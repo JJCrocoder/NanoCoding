@@ -19,6 +19,10 @@
 using namespace std;
 
 // Main function
+// The compiled executable can get some data as input
+// "argc" gives the number or arguments that the function has accepted as input, including the exceuting command
+// "argv" is an array (string type) that includes each of the arguments given as inputs
+// For example, if we run ./main 5 3.0 as an executable: argc = 3, argv = {"./main", "5", "3.0"}
 int main(int argc, char* argv[]) {
 
     // Create the energies vector from the file
