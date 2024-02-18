@@ -1,8 +1,9 @@
 // Libraries included
 
 // input and output operations
-#include <iostream> 
 // file manipulation
+
+#include <iostream> 
 #include <fstream>    
 #include <vector>     
 #include <algorithm>
