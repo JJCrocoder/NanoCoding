@@ -42,16 +42,9 @@ int main(int argc, char* argv[]) {
   
     // Here we compute the values of the xmin and xmax. 
     // I decided this method just because I couldn't think of any other one (Maybe using the variance ??). How xmax/min is computed depends on if mean > 0
-    if (mean < 0.0)
-    {
-      xmin = mean + mean/2.0;
-      xmax = mean - mean/2.0;
-    }
-    else
-    {
-      xmin = mean - mean/2.0;
-      xmax = mean + mean/2.0;
-    }
+    xmin = mean - abs(mean)/2.0;
+    xmax = mean + abs(mean)/2.0;
+
     // We print the values on the screen
     std::cout << "Xmax " << xmax << std::endl;
     std::cout << "Xmin " << xmin << std::endl;
