@@ -1,7 +1,7 @@
 // Libraries included
 
-// input and output operations
-// file manipulation
+// <iostream>: input and output operations
+// <fstream>: file manipulation
 
 #include <iostream> 
 #include <fstream>    
