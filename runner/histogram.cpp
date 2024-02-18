@@ -1,7 +1,11 @@
-// Libraries included
+// LIBRARIES INCLUDED
 
 // <iostream>: input and output operations
 // <fstream>: file manipulation
+// <vector>: dynamic arrays and automatic memory management
+// <algorithm>: Various array operations and methods (mainly related with order)
+// <cmath>: Mathematical functions and constants
+// <numeric>: Numerical operations on arrays
 
 #include <iostream> 
 #include <fstream>    
