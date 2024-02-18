@@ -1,6 +1,7 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
+// Libraries included
+#include <iostream>   // input and output operations
+#include <fstream>    // file manipulation
+#include <vector>     // 
 #include <algorithm>
 #include <cmath>
 #include <numeric>
