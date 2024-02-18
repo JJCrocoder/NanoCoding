@@ -18,7 +18,7 @@
 // Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
 using namespace std;
 
-// Main function
+// MAIN FUNCTION
 // The compiled executable can get some data as input
 // "argc" gives the number or arguments that the function has accepted as input, including the exceuting command
 // "argv" is an array (string type) that includes each of the arguments given as inputs
