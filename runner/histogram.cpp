@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     // We execute the loop while data can be extracted from "archivo"
     // Then, we use the push_back method for adding "energy" at the end of the "energies" vector
     while (archivo >> energy) energies.push_back(energy);
-    archivo.close();
+    archivo.close();           // Closing the file
 
     // Variables for the histogram
     const int numBins = atoi(argv[1]);
