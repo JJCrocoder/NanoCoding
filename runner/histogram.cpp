@@ -37,7 +37,11 @@ int main(int argc, char* argv[]) {
     archivo.close();           // Closing the file
 
     // Variables for the histogram
+
+    // "NumBins" takes a constant value when "argv[1]" string is converted to an integer
+    // The value given to "Numbins cannot be modified after this line"
     const int numBins = atoi(argv[1]);
+    // 
     float xmax = *max_element(energies.begin(), energies.end());
     float xmin = *min_element(energies.begin(), energies.end());
     float xrange = xmax - xmin;
