@@ -31,6 +31,8 @@ int main(int argc, char* argv[]) {
     fstream archivo("energies/equilibrium_energies.txt"); 
     vector<float> energies;    // "energies" float vector initialization
     float energy;              // each energy
+    // We execute the loop while data can be extracted from "archivo"
+    // Then, we use the push_back method for adding "energy" at the end of the "energies" vector
     while (archivo >> energy) energies.push_back(energy);
     archivo.close();
 
