@@ -22,12 +22,14 @@ using namespace std;
 // The compiled executable can get some data as input
 // "argc" gives the number or arguments that the function has accepted as input, including the exceuting command
 // "argv" is an array (string type) that includes each of the arguments given as inputs
-// For example, if we run ./main 5 3.0 as an executable: argc = 3, argv = {"./main", "5", "3.0"}
+// For example, if we run "./main 5 3.0" as an executable: argc = 3, argv = {"./main", "5", "3.0"}
 int main(int argc, char* argv[]) {
 
     // Create the energies vector from the file
-    fstream archivo("energies/equilibrium_energies.txt");
-    vector<float> energies;
+
+    // "archivo" fstream object creation. so the file, so the file specified by the path given is opened
+    fstream archivo("energies/equilibrium_energies.txt"); 
+    vector<float> energies;    // "energies" float vector initialization
     float energy;
     vector<float> x;
     while (archivo >> energy) x.push_back(energy);
