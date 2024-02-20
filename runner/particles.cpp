@@ -34,7 +34,10 @@ float Lbox = 10.0;
 float volume = Lbox*Lbox*Lbox;
 int dim = 3;
 float r_cut = 2.5 * sigma;
+
+// rdf variables
 float dmax = 0.5 * Lbox;
+float dmin = 0.0;
 
 // Main function
 int main(int argc, char *argv[]) {
@@ -113,25 +116,6 @@ int main(int argc, char *argv[]) {
                     fich_posi << pos_value << " ";
                 }
                 fich_posi << endl;
-
-		// RDF construction
-
-		//We are not considering the last particle (it is cosidered in all steps before)
-		if (i == Npart-1) continue; 
-		for (int j = i+1; j < Npart; ++j) // We count the j particles for pairing
-		{
-			float ri[dim];	// We initialize the particle i position
-			float rj[dim];	// We initialize the particle j position
-			for (int k = 0; k<dim; ++k)
-			{
-				// Entering values from the complete list
-				ri[k] = Position[i * dim + k]; 
-				rj[k] = Position[j * dim + k];
-			}
-			dist = mic_distance(ri,rj);
-			if (dist>=dmax) continue;
-			
-		}
             }
         }
     }
