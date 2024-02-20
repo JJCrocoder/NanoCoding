@@ -112,8 +112,7 @@ int main(int argc, char *argv[]) {
 	    {
                 for (int k = 0; k < dim; ++k)
 		{
-                    float pos_value = Position[i * dim + k];
-                    fich_posi << pos_value << " ";
+                    fich_posi << Position[i * dim + k] << " ";
                 }
                 fich_posi << endl;
             }
