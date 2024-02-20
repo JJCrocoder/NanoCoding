@@ -4,6 +4,8 @@
 #include <random>
 using namespace std;
 
+// ESTA ES LA RAMA DE JAVI
+
 // Minimum image convention (periodic boundary conditions)
 void mic(float * vec, float Lbox) {
     for (int i = 0; i < 3 ; ++i) {
