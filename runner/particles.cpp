@@ -3,7 +3,7 @@
 // <iostream>: input and output operations
 // <fstream>: file manipulation
 // <cmath>: Mathematical functions and constants
-// <random>: 
+// <random>: classes and functions for generating random numbers and sampling from different pdf
 
 #include <iostream>
 #include <cmath>
@@ -15,6 +15,8 @@
 using namespace std;
 
 // Minimum image convention (periodic boundary conditions)
+// Void functons doesn't return anything but you can change an argument inside them
+// In this case, vec is created outside the function, but modified inside of it
 void mic(float * vec, float Lbox) {
     for (int i = 0; i < 3 ; ++i) {
         vec[i] -= floorf(0.5 + vec[i]/Lbox)*Lbox;
@@ -32,6 +34,7 @@ float Lbox = 10.0;
 float volume = Lbox*Lbox*Lbox;
 int dim = 3;
 float r_cut = 2.5 * sigma;
+float dmax = 0.5 * Lbox;
 
 // Main function
 int main(int argc, char *argv[]) {
@@ -68,7 +71,8 @@ int main(int argc, char *argv[]) {
     for (int i=0; i<3*Npart; ++i) Position[i] = dis1(generator)*Lbox/2.;
 
     // Monte carlo loop
-    for (int istep = 0; istep<Nstep; ++istep) {
+    for (int istep = 0; istep<Nstep; ++istep) 
+    {
         int itag = dist(generator);
         float PosNew[dim], PosOld[dim];
         float Enew, Eold, prob;
@@ -97,14 +101,37 @@ int main(int argc, char *argv[]) {
         }
 
         // Save sample energy and position
+	// Here we will also calculate the radial distribution functions (rdf)
         if (istep % nsamp_ener == 0) fich_ener << 0.5*Esample << endl;       
-        if (istep % nsamp_pos == 0) {
-            for (int i = 0; i < Npart; ++i) {
-                for (int k = 0; k < dim; ++k) {
+        if (istep % nsamp_pos == 0) 
+	{
+            for (int i = 0; i < Npart; ++i) 
+	    {
+                for (int k = 0; k < dim; ++k)
+		{
                     float pos_value = Position[i * dim + k];
                     fich_posi << pos_value << " ";
                 }
                 fich_posi << endl;
+
+		// RDF construction
+
+		//We are not considering the last particle (it is cosidered in all steps before)
+		if (i == Npart-1) continue; 
+		for (int j = i+1; j < Npart; ++j) // We count the j particles for pairing
+		{
+			float ri[dim];	// We initialize the particle i position
+			float rj[dim];	// We initialize the particle j position
+			for (int k = 0; k<dim; ++k)
+			{
+				// Entering values from the complete list
+				ri[k] = Position[i * dim + k]; 
+				rj[k] = Position[j * dim + k];
+			}
+			dist = mic_distance(ri,rj);
+			if (dist>=dmax) continue;
+			
+		}
             }
         }
     }
