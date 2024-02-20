@@ -41,9 +41,9 @@ g++ histogram.cpp -o histogram_executable
 # Run the histogram executable
 ./histogram_executable $Nbins
 
-# Compile histogram.cpp
+# Compile rdf.cpp
 g++ rdf.cpp -o rdf_executable
-# Run the histogram executable
+# Run the rdf executable
 ./rdf_executable $Nbinsrdf
 
 # Remove the executables
