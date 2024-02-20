@@ -1,7 +1,17 @@
+// LIBRARIES INCLUDED
+
+// <iostream>: input and output operations
+// <fstream>: file manipulation
+// <cmath>: Mathematical functions and constants
+// <random>: 
+
 #include <iostream>
 #include <cmath>
 #include <fstream>
 #include <random>
+
+// This allow to use declarations in "std" namespace without calling it
+// Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
 using namespace std;
 
 // Minimum image convention (periodic boundary conditions)
