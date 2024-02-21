@@ -1,83 +1,83 @@
-// LIBRARIES INCLUDED
-
-// <iostream>: input and output operations
-// <fstream>: file manipulation
-// <vector>: dynamic arrays and automatic memory management
-// <algorithm>: Various array operations and methods (mainly related with order)
-// <cmath>: Mathematical functions and constants
-// <numeric>: Numerical operations on arrays
-
-#include <iostream> 
-#include <fstream>    
-#include <vector>     
-#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <string>
 #include <cmath>
-#include <numeric>
 
-// This allow to use declarations in "std" namespace without calling it
-// Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
-using namespace std;
-
-// MAIN FUNCTION
-// The compiled executable can get some data as input
-// "argc" gives the number or arguments that the function has accepted as input, including the exceuting command
-// "argv" is an array (string type) that includes each of the arguments given as inputs
-// For example, if we run "./main 5 3.0" as an executable: argc = 3, argv = {"./main", "5", "3.0"}
+/*WARNING
+THIS CODE WILL WORK WITH THE TXT FILE OF THE EQUILIBRIUM, BEWARE OF THAT. IF U USE THE FULL ENERGY TXT FILE THE MEAN IS GONNA BE FUCKED UP AND SO THE HISTOGRAM COMPUTING*/
 int main(int argc, char* argv[]) {
+  
+  //First I compute the mean and the variance 
+  // Open the file
+  std::ifstream file(argv[1]); //opens the file, and will not close it until the end cause it raises some errors
+  if (file.is_open()){ // check that it is open
+    std::string line; //initializes each line 
+    double total; //I define the following variables to compute the mean
+    int i = 0;
+    double value;
+    while (std::getline(file,line)){ //I iterate over each line 
+      value = std::stof(line); // assign the variable value to each line
+      total = total + value; // And sum all lines
+      i++;
+    }
+    float mean=total/((float)i); //This is to compute the mean, as the name shows
 
-    // Create the energies vector from the file
+    std::cout << "Mean" << mean <<std::endl; //this prints sout the result for the mean 
+  
+  //Now with the histogram
+  //Setting the variables
+  const int Nbin=std::stoi(argv[2]); //This way I define the Nbin by the screen. The const keeps its value constant (I don't know why but it is needed for the code to work)
+  int histo[Nbin]={0}; //Initialize the histo array, {0} assign 0 to each value of the array
+  float pdf[Nbin]={0.0};  //The same for the normalize values of the histogram
+  int ncount=0; // count how many energies are we looking at 
+  float xmin; //Initialize the cutoffs for the energy
+  float xmax;
 
-    // "archivo" fstream object creation. so the file, so the file specified by the path given is opened
-    fstream archivo("energies/equilibrium_energies.txt"); 
-    vector<float> energies;    // "energies" float vector initialization
-    float energy;              // each energy
-    // We execute the loop while data can be extracted from "archivo"
-    // Then, we use the push_back method for adding "energy" at the end of the "energies" vector
-    while (archivo >> energy) energies.push_back(energy);
-    archivo.close();           // Closing the file
+  if (mean < 0.0){ //Here we compute the values of the xmin and xmax. I decided this method just because I couldn't think of any other one (Maybe using the variance ??). How xmax/min is computed depends on if mean > 0
+   xmin= mean + mean/2.0;
+   xmax= mean - mean/2.0;
+  }else{
+   xmin= mean - mean/2.0;
+   xmax= mean + mean/2.0;
+  }
+  std::cout << "Xmax " << xmax << std::endl;
+  std::cout << "Xmin " << xmin << std::endl;
+  float xrange=xmax-xmin; //Compute the range and the step
+  float deltax = xrange/(float)Nbin;
 
-    // Variables for the histogram
+//Histogram creation
 
-    // "NumBins" takes a constant value when "argv[1]" string is converted to an integer
-    // The value given to "Numbins cannot be modified after this line"
-    const int numBins = atoi(argv[1]);
-    // 
-    float xmax = *max_element(energies.begin(), energies.end());
-    float xmin = *min_element(energies.begin(), energies.end());
-    float xrange = xmax - xmin;
-    float binWidth = xrange / numBins;
-    vector<int> histogram(numBins, 0);
+  std::ifstream file(argv[1]); //Again, read the file
+    // Read each line of the file
+    while (std::getline(file, line)) {
+      // Process the line (e.g., print it)
+        double value = std::stof(line); //As before, we read each line and store the valeu 
+        ncount+=1; //We add one to the count even if the value is larger than the range so the pdf doesn't sum up to 1
+        if (value < xmin ) continue; //If the value is within our range 
+        if (xmax < value ) continue;
+        //We compute to which bin does the value belongs
+        int ibin = std::floor((value-xmin)/deltax);  
+        histo[ibin]+=1; //We add one to the bin the number belongs
+  }
 
-    // Create the histogram
-    for (float value : energies) {
-        int binIndex = static_cast<int>((value - xmin) / binWidth);
-        histogram[binIndex]++;
+    for (int i = 0 ; i< Nbin; ++i){
+        pdf[i]=(float)(histo[i])/(deltax*(float)ncount); //Here we compute the pdf based on the formula Rafa put in the whiteboard
     }
 
-    // Normalization of the histogram
-    cout << "Histogram: " <<endl <<endl;
-    vector<float> binNormalizedValues(numBins, 0.0);
-    for (int i = 0; i < numBins; ++i) {
-        binNormalizedValues[i] = static_cast<float>(histogram[i]) / (energies.size() * binWidth);
-
-        // Print the histogram
-        cout << "   Bin " << i + 1 << "= " << binNormalizedValues[i] << endl <<endl;
-    }
-
-    // Calculate variance
-    float mean = accumulate(binNormalizedValues.begin(), binNormalizedValues.end(), 0.0) / numBins;
-    float variance = 0.0;
-    for (int i = 0; i < numBins; ++i) {
-        variance += (binNormalizedValues[i] - mean)*(binNormalizedValues[i] - mean);
-    }
-    variance /= (numBins - 1);
-
-    // Calculate the standard desviation
-    float std = sqrt(variance);
+//The PDF has to be equal 1 or be less than one when we multiply it by the deltax
     
-    // Print the data
-    cout << "Variance= " << variance << endl;
-    cout << "Std= " << std << endl <<endl;
-    
+    // Close the file
+    file.close(); //close the file
+
+    std::ofstream fich_hist; //We create a new file called fich_hist
+
+    fich_hist.open("hist.txt"); //We open it
+    for (int i=0; i < Nbin ; ++i){
+        fich_hist << pdf[i] << std::endl ;  //We store pdf value inside
+    }
+    fich_hist.close();
+      } else {
+    std::cerr << "Error opening file!" << std::endl; //This is just to print an error if the file doesn't exists
+  }
     return 0;
 }
