@@ -14,7 +14,11 @@
 // Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
 using namespace std;
 
+
+float mic_distance(float * Position_part_i, float * Position_part_j, int dim) 
+
 // MAIN FUNCTION
+
 // The compiled executable can get some data as input
 // "argc" gives the number or arguments that the function has accepted as input, including the exceuting command
 // "argv" is an array (string type) that includes each of the arguments given as inputs
@@ -49,7 +53,6 @@ int main(int argc, char* argv[]) {
     }
     // while (archivo >> energy) x.push_back(energy);
     archivo.close();	// We close the file
-
 	
     // RDF construction
 	
@@ -68,7 +71,7 @@ int main(int argc, char* argv[]) {
 		ri[k] = positions[i * dim + k]; 
 		rj[k] = positions[j * dim + k];
 	}
-	dist = mic_distance(ri,rj);
+	dist = mic_distance(ri, rj, dim);
 	if (dist >= dmax) continue;	
     }
 	
@@ -112,4 +115,17 @@ int main(int argc, char* argv[]) {
     cout << "Std= " << std << endl <<endl;
     
     return 0;
+}
+
+float mic_distance(float * Position_part_i, float * Position_part_j, int dim) 
+{
+    float rij[dim];
+    float mod2_rij; 
+    for (int k = 0; k < 3; ++k)
+    {
+        rij[k] = Position_part_j[k] - Position_part_i[k];
+        rij[k] -= L_box * floor(rij[k] / L_box + 0.5); 
+        mod2_rij += rij[k]*rij[k];
+    }
+    return sqrt(mod2_rij);
 }
