@@ -72,7 +72,11 @@ int main(int argc, char* argv[]) {
 		rj[k] = positions[j * dim + k];
 	}
 	dist = mic_distance(ri, rj, dim);
-	if (dist >= dmax) continue;	
+	if (dist >= dmax) continue;
+	//Calculate to which bin such distance belongs
+	int IBIN = floor((distancia - min_val) / DeltaX);
+	//Remember that the distance is of a pair of particles, so it contributes twice in our histogram.
+	Histo[IBIN] += 2;
     }
 	
     // Variables for the histogram
