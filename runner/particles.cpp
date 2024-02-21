@@ -24,6 +24,16 @@ void mic(float * vec, float Lbox) {
     return;
 }
 
+//We declare the random generator functions
+
+float uniform(double min, double max) { // Random real number in an uniform distrobution
+    return min + (max-min)*rand()/RAND_MAX;
+}
+
+int rand_num(int min, int max) { // Random integer number in an uniform discrete distribution
+    return rand() % (max-min+1) + min;
+}
+
 // Function definition
 float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
 
@@ -41,8 +51,6 @@ float dmin = 0.0;
 
 // Main function
 int main(int argc, char *argv[]) {
-    random_device rand_dev;
-    mt19937 generator(rand_dev());
 
     // Variables
     float densinput = atof(argv[1]);
@@ -65,25 +73,20 @@ int main(int argc, char *argv[]) {
     fich_ener.open("energy.txt");
     fich_posi.open("position.txt");
 
-    // Random number generators
-    uniform_real_distribution<> dis1(-1.0, 1.0);
-    uniform_real_distribution<> dis2(0.0, 1.0);
-    uniform_int_distribution<> dist(0, Npart-1);
-
     // Initial positions
-    for (int i=0; i<3*Npart; ++i) Position[i] = dis1(generator)*Lbox/2.;
+    for (int i=0; i<3*Npart; ++i) Position[i] = uniform (-1.0, 1.0)*Lbox/2.;
 
     // Monte carlo loop
     for (int istep = 0; istep<Nstep; ++istep) 
     {
-        int itag = dist(generator);
+        int itag = rand_num(0,Npart-1);
         float PosNew[dim], PosOld[dim];
         float Enew, Eold, prob;
 
         // Move particle itag
         for (int k=0; k<dim; ++k) {
             PosOld[k] = Position[dim*itag + k];
-            PosNew[k] = Position[dim*itag + k] + deltaR * dis1(generator);
+            PosNew[k] = Position[dim*itag + k] + deltaR * uniform(-1.0, 1.0);
         }
 
         //Energies of itag
@@ -93,7 +96,7 @@ int main(int argc, char *argv[]) {
         // Probabiliy ratio
         prob = exp(-(Enew-Eold)/Temp);
 
-        float xi = dis2(generator);
+        float xi = uniform(0.0, 1.0);
         float Esample = Eold;
 
         // If transition is accept
