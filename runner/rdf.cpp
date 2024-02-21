@@ -23,6 +23,7 @@ float mic_distance(float * Position_part_i, float * Position_part_j, int dim)
 // "argc" gives the number or arguments that the function has accepted as input, including the exceuting command
 // "argv" is an array (string type) that includes each of the arguments given as inputs
 // For example, if we run ./main 5 3.0 as an executable: argc = 3, argv = {"./main", "5", "3.0"}
+// For this code, the arguments should be the number of spatial bins, the box lenght. 
 int main(int argc, char* argv[]) {
 
     // Create the positions vector from the file
@@ -58,6 +59,8 @@ int main(int argc, char* argv[]) {
 	
     int dim = position.size();		// We define the dimension from the position coordinates
     int Npart = positions.size()/dim;	// And here, the number of particles from the toltal array
+    float Lbox = atof(argv[2]); 	// We take the Lbox value from the imput, converting it from text to float
+    float dmax = 0.5*Lbox; 		// We create a limit for rdf representation
 
     // We are not considering the last particle (it is cosidered in all steps before)
     if (i == Npart-1) continue; 
@@ -74,9 +77,9 @@ int main(int argc, char* argv[]) {
 	dist = mic_distance(ri, rj, dim);
 	if (dist >= dmax) continue;
 	//Calculate to which bin such distance belongs
-	int IBIN = floor((distancia - min_val) / DeltaX);
+	int IBIN = floor(distancia / DeltaX);
 	//Remember that the distance is of a pair of particles, so it contributes twice in our histogram.
-	Histo[IBIN] += 2;
+	histo[IBIN] += 2;
     }
 	
     // Variables for the histogram
