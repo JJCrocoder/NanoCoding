@@ -59,8 +59,10 @@ int main(int argc, char* argv[]) {
 	
     int dim = position.size();		// We define the dimension from the position coordinates
     int Npart = positions.size()/dim;	// And here, the number of particles from the toltal array
+    const int numBins = atoi(argv[1]);	// Number of bins for the rdf representation
     float Lbox = atof(argv[2]); 	// We take the Lbox value from the imput, converting it from text to float
     float dmax = 0.5*Lbox; 		// We create a limit for rdf representation
+    float DeltaX = dmax/numBins; 	// The spatial width of the bins
 
     // We are not considering the last particle (it is cosidered in all steps before)
     if (i == Npart-1) continue; 
@@ -77,23 +79,9 @@ int main(int argc, char* argv[]) {
 	dist = mic_distance(ri, rj, dim);
 	if (dist >= dmax) continue;
 	//Calculate to which bin such distance belongs
-	int IBIN = floor(distancia / DeltaX);
+	int IBIN = floor(dist / DeltaX);
 	//Remember that the distance is of a pair of particles, so it contributes twice in our histogram.
 	histo[IBIN] += 2;
-    }
-	
-    // Variables for the histogram
-    const int numBins = atoi(argv[1]);
-    float xmax = *max_element(x.begin(), x.end());
-    float xmin = *min_element(x.begin(), x.end());
-    float xrange = xmax - xmin;
-    float binWidth = xrange / numBins;
-    vector<int> histogram(numBins, 0);
-
-    // Create the histogram
-    for (float value : x) {
-        int binIndex = static_cast<int>((value - xmin) / binWidth);
-        histogram[binIndex]++;
     }
 
     // Normalization of the histogram
