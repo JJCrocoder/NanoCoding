@@ -9,6 +9,7 @@ temp=${3:-1.9}            #Bath temperature of the system
 Nsteps=${4:-50000}        #Number of steps for montecarlo
 Nbins=${5:-50}            #Number of bins
 Nbinsrdf=${6:-50}         #Number of bins for rdf calculation
+Lbox=${7:-10}             #Default box length
 
 # Compile particles.cpp
 g++ particles.cpp -o particles_executable
@@ -44,7 +45,7 @@ g++ histogram.cpp -o histogram_executable
 # Compile rdf.cpp
 g++ rdf.cpp -o rdf_executable
 # Run the rdf executable
-./rdf_executable $Nbinsrdf
+./rdf_executable $Nbinsrdf $Lbox
 
 # Remove the executables
 rm particles_executable
