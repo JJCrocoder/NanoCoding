@@ -106,8 +106,8 @@ int main(int argc, char* argv[]) {
     float std = sqrt(variance);
     
     // Print the data
-    cout << "Variance= " << variance << endl;
-    cout << "Std= " << std << endl <<endl;
+    cout << "Variance = " << variance << endl;
+    cout << "Std = " << std << endl <<endl;
     
     return 0;
 }
