@@ -24,6 +24,18 @@ void mic(float * vec, float Lbox) {
     return;
 }
 
+float mic_distance(float * Position_part_i, float *Position_part_j); {
+    float rij[dim];
+    float mod2_rij; 
+    for (int k = 0; k < 3; ++k)
+    {
+        rij[k] = Position_part_j[k] - Position_part_i[k];
+        rij[k] -= L_box * floorf(rij[k] / L_box + 0.5); 
+        mod2_rij += rij[k]*rij[k];
+    }
+    return sqrt(mod2_rij);
+}
+
 //We declare the random generator functions
 
 float uniform(double min, double max) { // Random real number in an uniform distrobution
@@ -48,6 +60,8 @@ float r_cut = 2.5 * sigma;
 // rdf variables
 float dmax = 0.5 * Lbox;
 float dmin = 0.0;
+int num_bins = 100;
+float DeltaX = (dmax - dmin)/num_bins;
 
 // Main function
 int main(int argc, char *argv[]) {
@@ -61,6 +75,7 @@ int main(int argc, char *argv[]) {
     int nsamp_ener = 10;
     int nsamp_pos = 100;
     int naccept = 0;
+    int ncount = 0;
     float deltaR = 0.1;
     float Position[dim*Npart];
 
@@ -111,17 +126,53 @@ int main(int argc, char *argv[]) {
         if (istep % nsamp_ener == 0) fich_ener << 0.5*Esample << endl;       
         if (istep % nsamp_pos == 0) 
 	{
-            for (int i = 0; i < Npart; ++i) 
+            for (int i = 0; i < N_part - 1; ++i)
 	    {
-                for (int k = 0; k < dim; ++k)
+		for (int k = 0; k < dim; ++k)
 		{
-                    fich_posi << Position[i * dim + k] << " ";
+		    fich_posi << Position[i * dim + k] << " ";
+		}
+	        fich_posi << endl;
+		    
+		if (i == Npart) continue;
+		    
+		//We calculate the distances between every pair of particles
+		    
+                for (int j = i + 1; j < N_part; ++j) {
+                    double Pos_i[3];
+                    double Pos_j[3];
+
+                    for (int k = 0; k < 3; ++k) {
+                        Pos_i[k] = Position[i * N_dim + k];
+                        Pos_j[k] = Position[j * N_dim + k];
+                    }
+                    //Take into consideration the MIC (Minimum Image Convention) and calculate the distance between particle i and j
+                    float dist = mic_distance(Pos_i, Pos_j);
+                    //Analyze if such distance is inside the range of our histogram
+                    if (dist > dmax) continue;
+		    //Calculate to which bin such distance belongs
+		    int IBIN = floor((dist - dmin) / DeltaX);
+		    //Remember that the distance is of a pair of particles, so it contributes twice in our histogram.
+		    Histo[IBIN] += 2;
+		    ncount += 2;
                 }
-                fich_posi << endl;
             }
         }
     }
-    
+
+    // Normalization of the histogram
+    for (int k = 0; k < num_bins; ++k) 
+    {
+        float rrr = min_val + DeltaX * (k + 0.5);
+        float Nideal = 4.0 / 3.0 * pi * dens * (pow(rrr + 0.5*DeltaX, 3) - pow(rlow - 0.5*DeltaX, 3));
+        float GR = Histo[k] / (N_part * Nideal * ncount);
+        float << rrr << ' ' << GR << endl;
+    }
+
+
+
+    //Cerramos los ficheros que entra el frío
+    fich_rdf.close();
     // Close data files
     fich_ener.close();
     fich_posi.close();
