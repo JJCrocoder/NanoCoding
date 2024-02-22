@@ -22,27 +22,34 @@ using namespace std;
 // The compiled executable can get some data as input
 // "argc" gives the number or arguments that the function has accepted as input, including the exceuting command
 // "argv" is an array (string type) that includes each of the arguments given as inputs
-// For example, if we run ./main 5 3.0 as an executable: argc = 3, argv = {"./main", "5", "3.0"}
+// For example, if we run "./main 5 3.0" as an executable: argc = 3, argv = {"./main", "5", "3.0"}
 int main(int argc, char* argv[]) {
 
     // Create the energies vector from the file
-    fstream archivo("energies/equilibrium_energies.txt");
-    vector<float> energies;
-    float energy;
-    vector<float> x;
-    while (archivo >> energy) x.push_back(energy);
-    archivo.close();
+
+    // "archivo" fstream object creation. so the file, so the file specified by the path given is opened
+    fstream archivo("energies/equilibrium_energies.txt"); 
+    vector<float> energies;    // "energies" float vector initialization
+    float energy;              // each energy
+    // We execute the loop while data can be extracted from "archivo"
+    // Then, we use the push_back method for adding "energy" at the end of the "energies" vector
+    while (archivo >> energy) energies.push_back(energy);
+    archivo.close();           // Closing the file
 
     // Variables for the histogram
+
+    // "NumBins" takes a constant value when "argv[1]" string is converted to an integer
+    // The value given to "Numbins cannot be modified after this line"
     const int numBins = atoi(argv[1]);
-    float xmax = *max_element(x.begin(), x.end());
-    float xmin = *min_element(x.begin(), x.end());
+    // 
+    float xmax = *max_element(energies.begin(), energies.end());
+    float xmin = *min_element(energies.begin(), energies.end());
     float xrange = xmax - xmin;
     float binWidth = xrange / numBins;
     vector<int> histogram(numBins, 0);
 
     // Create the histogram
-    for (float value : x) {
+    for (float value : energies) {
         int binIndex = static_cast<int>((value - xmin) / binWidth);
         histogram[binIndex]++;
     }
@@ -51,7 +58,7 @@ int main(int argc, char* argv[]) {
     cout << "Histogram: " <<endl <<endl;
     vector<float> binNormalizedValues(numBins, 0.0);
     for (int i = 0; i < numBins; ++i) {
-        binNormalizedValues[i] = static_cast<float>(histogram[i]) / (x.size() * binWidth);
+        binNormalizedValues[i] = static_cast<float>(histogram[i]) / (energies.size() * binWidth);
 
         // Print the histogram
         cout << "   Bin " << i + 1 << "= " << binNormalizedValues[i] << endl <<endl;
