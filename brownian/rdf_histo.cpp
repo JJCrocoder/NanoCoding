@@ -81,3 +81,17 @@ int main(int argc, char* argv[]) {
   }
     return 0;
 }
+
+
+/* THIS IS THE LAST PART FROM JAVI, THE NORMALIZATION, CHECK WHERE I COULD FIT IT 
+
+        for (int k = 0; k < num_bins; ++k) {
+            double rlow = min_val + DeltaX * k;
+            double rup = min_val + DeltaX * (k + 1);
+            double rrr = (rup + rlow) / 2;
+            double Nideal = Const * (pow(rup, 3) - pow(rlow, 3));
+            double GR = Histo[k] / (N_part * Nideal * tsteps);
+            fich_rdf << rrr << ' ' << GR << endl;
+        }
+
+*/
