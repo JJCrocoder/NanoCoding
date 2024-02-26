@@ -7,7 +7,7 @@ bucles for. Seguidamente guardo estas distancias en le fichero.
 
 Creo que de esta manera el código debería de funcionar, aunque solo samplee las distancias respecto a una molécula 
 y no respecto a todas, el largo plazo debería de corregir esto. Un posible problema es que si la caja es grande y hay poca 
-densidad pues distancias raras saldran (aunque quiza el mic lo corrige)*/
+densidad pues distancias raras saldran (aunque quiza el mic lo corrige)    a*/
 
 #include <iostream> // inputs and outputs
 #include <cmath> //For math functions
