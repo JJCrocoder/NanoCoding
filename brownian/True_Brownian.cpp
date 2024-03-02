@@ -20,6 +20,8 @@ void mic(float * vec, float Lbox){
 
 float Energy(float Position[], float N_O_Pos[], int itag);
 
+float Force
+
 // Global variables
 
 float sigma = 1.0;
@@ -172,6 +174,7 @@ de fuerzas a la posición del itag*/
         for (int k =0;k<dim;++k) force[i*dim+k] = force_Ij[k];                
 
     }
+    return force;
 }
 
 
