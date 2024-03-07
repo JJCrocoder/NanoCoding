@@ -70,90 +70,99 @@ float randn(float mean, float var) {// Random real number in a gausian distribut
 // Various function definitions
 float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
 
-// Main function
+// MAIN FUNCTION
+
+// The compiled executable can get some data as input
+// "argc" gives the number or arguments that the function has accepted as input, including the exceuting command
+// "argv" is an array (string type) that includes each of the arguments given as inputs
+// For example, if we run ./main 5 3.0 as an executable: argc = 3, argv = {"./main", "5", "3.0"}
+// For this code, the arguments should be the system density, temperature and number of simulation steps.
 int main(int argc, char *argv[]) {
 
     // Variables
-    float densinput = atof(argv[1]);
-    float Temp = atof(argv[2]);
-    int Npart=(int)(densinput*volume);
-    float dens = Npart/volume;
-    int Nstep = atof(argv[3]);
-    int nsamp_ener = 10;
-    int nsamp_pos = 100;
-    int naccept = 0;
-    int ncount = 0;
-    float deltaR = 0.1;
-    float Position[dim*Npart];
+    float densinput = atof(argv[1]); 	// We store the input density
+    float Temp = atof(argv[2]);		// Same for temperature
+    int Nstep = atof(argv[3]);		// And for the number of simulation steps
+    int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
+    float dens = Npart/volume;		// And fix the real density value
+    int nsamp_ener = 10;		// Steps for energy sampling
+    int nsamp_pos = 100;		// Steps for position sampling
+    int naccept = 0;			// counter for accepted particle displacements
+    int ncount = 0;			// 
+    float deltaR = 0.1;			// Size of the metropolis random displacement
+    float Position[dim*Npart];		// Particles positions array
 
     // LOG of the run
-    cout << "   Density = "<< dens <<endl;
-    cout << "   Temperature = "<< Temp <<endl;
+    cout << " Density = "<< dens <<endl;
+    cout << " Temperature = "<< Temp <<endl;
 
     // Open data files
-    ofstream fich_ener, fich_posi;
+    ofstream fich_ener, fich_posi, fich_rdf;
     fich_ener.open("energy.txt");
     fich_posi.open("position.txt");
+    fich_rdf.open("rdf_hist.txt");
 
     // Initial positions
-    for (int i=0; i<3*Npart; ++i) Position[i] = uniform (-1.0, 1.0)*Lbox/2.;
+    for (int i=0; i<3*Npart; ++i) Position[i] = uniform(-0.5*Lbox, 0.5*Lbox);
 
-    // Monte carlo loop
+    // Montecarlo loop
     for (int istep = 0; istep<Nstep; ++istep) 
     {
-        int itag = rand_num(0,Npart-1);
-        float PosNew[dim], PosOld[dim];
-        float Enew, Eold, prob;
+        int itag = rand_num(0,Npart-1);	// A random index for selecting a particle
+        float PosNew[dim], PosOld[dim];	// Position arrays for the selected particle
+        float Enew, Eold, prob;		// Energies and probabilities variables
 
-        // Move particle itag
+        // Move selected particle
         for (int k=0; k<dim; ++k) {
-            PosOld[k] = Position[dim*itag + k];
-            PosNew[k] = Position[dim*itag + k] + deltaR * uniform(-1.0, 1.0);
+            PosOld[k] = Position[dim*itag + k]; // The current position
+            PosNew[k] = Position[dim*itag + k] +  uniform(-deltaR, deltaR); // The modified position
         }
+	
+        //Energies of the selected particle
+        Eold = Energy(Position, PosOld, itag, Npart);	// Current energy
+        Enew = Energy(Position, PosNew, itag, Npart);	// Modified Energy
 
-        //Energies of itag
-        Eold = Energy(Position, PosOld, itag, Npart);
-        Enew = Energy(Position, PosNew, itag, Npart);
+        prob = exp(-(Enew-Eold)/Temp);	// Probabiliy ratio
 
-        // Probabiliy ratio
-        prob = exp(-(Enew-Eold)/Temp);
+        float xi = uniform(0.0, 1.0);	// Auxiliar variable for accept-reject
+        float Esample = Eold;		// We initialize the sampling with the current energy
 
-        float xi = uniform(0.0, 1.0);
-        float Esample = Eold;
-
-        // If transition is accept
+        // For acceptance
         if (prob > xi) {
+	    // The system configuration is modified
             for (int k=0; k<dim; ++k) Position[itag*dim + k] = PosNew[k];
-            naccept = naccept + 1;
-            Esample = Enew;
+            naccept = naccept + 1;	// We add an accept
+            Esample = Enew;		// The sampled energy is modified
         }
 
         // Save sample energy and position
-	// Here we will also calculate the radial distribution functions (rdf)
-        if (istep % nsamp_ener == 0) fich_ener << 0.5*Esample << endl;       
+	// Here we will also calculate the radial distribution function (rdf)
+        if (istep % nsamp_ener == 0) fich_ener << 0.5*Esample << endl; // Storing energy      
         if (istep % nsamp_pos == 0) 
 	{
-            for (int i = 0; i < N_part - 1; ++i)
+            for (int i = 0; i < N_part - 1; ++i)	// For each particle
 	    {
-		for (int k = 0; k < dim; ++k)
+		for (int k = 0; k < dim; ++k)		// For each component 
 		{
-		    fich_posi << Position[i * dim + k] << " ";
+		    fich_posi << Position[i * dim + k] << " "; // we store each component in a single line
 		}
-	        fich_posi << endl;
-		    
-		if (i == Npart) continue;
-		    
-		//We calculate the distances between every pair of particles
-		    
-                for (int j = i + 1; j < N_part; ++j) {
-                    double Pos_i[3];
-                    double Pos_j[3];
+	        fich_posi << endl;	// Every particle is a diferent line
 
-                    for (int k = 0; k < 3; ++k) {
+		// RDF
+
+		    
+		if (i == Npart) continue; // We don't count the last particle in "i" index for RDF calculation
+		    
+		//We calculate the distances between every pair of particles   
+                for (int j = i + 1; j < N_part; ++j) {
+                    double Pos_i[dim];
+                    double Pos_j[dim];
+
+                    for (int k = 0; k < dim; ++k) {
                         Pos_i[k] = Position[i * N_dim + k];
                         Pos_j[k] = Position[j * N_dim + k];
                     }
-                    //Take into consideration the MIC (Minimum Image Convention) and calculate the distance between particle i and j
+                    //Take into consideration the MIC (Minimum Image Convention)
                     float dist = mic_distance(Pos_i, Pos_j, Lbox);
                     //Analyze if such distance is inside the range of our histogram
                     if (dist > dmax) continue;
@@ -164,10 +173,11 @@ int main(int argc, char *argv[]) {
 		    ncount += 2;
                 }
             }
+	fich_posi<<endl<<"#"<<endl; // Add time frame separators (minipunto)
         }
     }
 
-    // Normalization of the histogram
+    // Normalization of the RDF histogram
     for (int k = 0; k < num_bins; ++k) 
     {
         float rrr = min_val + DeltaX * (k + 0.5);
@@ -176,11 +186,8 @@ int main(int argc, char *argv[]) {
         float << rrr << ' ' << GR << endl;
     }
 
-
-
-    //Cerramos los ficheros que entra el frío
-    fich_rdf.close();
     // Close data files
+    fich_rdf.close();
     fich_ener.close();
     fich_posi.close();
 
