@@ -185,9 +185,9 @@ int main(int argc, char *argv[]) {
     for (int k = 0; k < num_bins; ++k) 
     {
         float rrr = dmin + DeltaX * (k + 0.5);
-        float Nideal = 4.0 / 3.0 * pi * dens * (pow(rrr + 0.5*DeltaX, 3) - pow(rlow - 0.5*DeltaX, 3));
-        float GR = Histo[k] / (N_part * Nideal * ncount);
-        float << rrr << ' ' << GR << endl;
+        float Nideal = 4.0 / 3.0 * pi * dens * (pow(rrr + 0.5*DeltaX, 3) - pow(rrr - 0.5*DeltaX, 3));
+        float GR = Histo[k] / (Npart * Nideal * ncount);
+        fich_rdf << rrr << ' ' << GR << endl;
     }
 
     // Close data files
