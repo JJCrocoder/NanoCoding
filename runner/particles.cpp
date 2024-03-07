@@ -14,6 +14,21 @@
 // Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
 using namespace std;
 
+// Global variables
+float sigma = 1.0;
+float epsilon = 1.0;
+float Lbox = 10.0;
+float volume = Lbox*Lbox*Lbox;
+int dim = 3;
+float r_cut = 2.5 * sigma;
+
+// rdf variables
+float dmax = 0.5 * Lbox;
+float dmin = 0.0;
+int num_bins = 100;
+float DeltaX = (dmax - dmin)/num_bins;
+
+
 // Minimum image convention (periodic boundary conditions)
 // Void functons doesn't return anything but you can change an argument inside them
 // In this case, vec is created outside the function, but modified inside of it
@@ -37,7 +52,6 @@ float mic_distance(float * Position_part_i, float *Position_part_j, float Lbox);
     return sqrt(mod2_rij);
 }
 
-
 //We define the random generator functions
 float uniform(float min, float max) { // Random real number in an uniform distribution
     return min + (max-min)*rand()/RAND_MAX;
@@ -55,20 +69,6 @@ float randn(float mean, float var) {// Random real number in a gausian distribut
 
 // Various function definitions
 float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
-
-// Global variables
-float sigma = 1.0;
-float epsilon = 1.0;
-float Lbox = 10.0;
-float volume = Lbox*Lbox*Lbox;
-int dim = 3;
-float r_cut = 2.5 * sigma;
-
-// rdf variables
-float dmax = 0.5 * Lbox;
-float dmin = 0.0;
-int num_bins = 100;
-float DeltaX = (dmax - dmin)/num_bins;
 
 // Main function
 int main(int argc, char *argv[]) {
