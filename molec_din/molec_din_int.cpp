@@ -57,7 +57,7 @@ void forces(float Pos[], float For[])
       float r2_ij = 0.0;
         
       for (int k = 0; k < dim; ++k) vec_dist[k] = Pos[j*dim+k] - Pos[i * dim + k];
-      mic(vec_dist, Lbox);
+mic(vec_dist, Lbox);
       for (int k = 0; k < dim; ++k) r2_ij += vec_dist[k]*vec_dist[k];
 
       if (r2_ij < r_2cut)
