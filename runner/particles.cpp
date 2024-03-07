@@ -40,7 +40,7 @@ void mic(float * vec, float Lbox) {
 }
 
 // We use the mic to calculate the image distance between 2 vectors
-float mic_distance(float * Position_part_i, float *Position_part_j, float Lbox); {
+float mic_distance(float * Position_part_i, float *Position_part_j, float Lbox) {
     float rij[dim];
     float mod2_rij; 
     for (int k = 0; k < 3; ++k)
@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
         if (istep % nsamp_ener == 0) fich_ener << 0.5*Esample << endl; // Storing energy      
         if (istep % nsamp_pos == 0) 
 	{
-            for (int i = 0; i < N_part - 1; ++i)	// For each particle
+            for (int i = 0; i < Npart - 1; ++i)	// For each particle
 	    {
 		for (int k = 0; k < dim; ++k)		// For each component 
 		{
@@ -154,13 +154,13 @@ int main(int argc, char *argv[]) {
 		if (i == Npart) continue; // We don't count the last particle in "i" index for RDF calculation
 		    
 		//We calculate the distances between every pair of particles   
-                for (int j = i + 1; j < N_part; ++j) {
-                    double Pos_i[dim];
-                    double Pos_j[dim];
+                for (int j = i + 1; j < Npart; ++j) {
+                    float Pos_i[dim];
+                    float Pos_j[dim];
 
                     for (int k = 0; k < dim; ++k) {
-                        Pos_i[k] = Position[i * N_dim + k];
-                        Pos_j[k] = Position[j * N_dim + k];
+                        Pos_i[k] = Position[i * dim + k];
+                        Pos_j[k] = Position[j * dim + k];
                     }
                     //Take into consideration the MIC (Minimum Image Convention)
                     float dist = mic_distance(Pos_i, Pos_j, Lbox);
