@@ -14,6 +14,8 @@
 // Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
 using namespace std;
 
+const double pi = 3.14159265358979323846;
+
 // Global variables
 float sigma = 1.0;
 float epsilon = 1.0;
@@ -91,7 +93,9 @@ int main(int argc, char *argv[]) {
     int ncount = 0;			// 
     float deltaR = 0.1;			// Size of the metropolis random displacement
     float Position[dim*Npart];		// Particles positions array
-
+    vector<int> Histo(num_bins, 0);  //Vector which elements are related with each one of the different bins
+    float Const = 4.0 / 3.0 * dens * pi; //Constant needed for normalization
+	
     // LOG of the run
     cout << " Density = "<< dens <<endl;
     cout << " Temperature = "<< Temp <<endl;
@@ -103,7 +107,7 @@ int main(int argc, char *argv[]) {
     fich_rdf.open("rdf_hist.txt");
 
     // Initial positions
-    for (int i=0; i<3*Npart; ++i) Position[i] = uniform(-0.5*Lbox, 0.5*Lbox);
+    for (int i=0; i<dim*Npart; ++i) Position[i] = uniform(-0.5*Lbox, 0.5*Lbox);
 
     // Montecarlo loop
     for (int istep = 0; istep<Nstep; ++istep) 
@@ -180,7 +184,7 @@ int main(int argc, char *argv[]) {
     // Normalization of the RDF histogram
     for (int k = 0; k < num_bins; ++k) 
     {
-        float rrr = min_val + DeltaX * (k + 0.5);
+        float rrr = dmin + DeltaX * (k + 0.5);
         float Nideal = 4.0 / 3.0 * pi * dens * (pow(rrr + 0.5*DeltaX, 3) - pow(rlow - 0.5*DeltaX, 3));
         float GR = Histo[k] / (N_part * Nideal * ncount);
         float << rrr << ' ' << GR << endl;
