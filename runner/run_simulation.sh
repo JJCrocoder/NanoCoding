@@ -42,15 +42,9 @@ g++ histogram.cpp -o histogram_executable
 # Run the histogram executable
 ./histogram_executable $Nbins
 
-# Compile rdf.cpp
-g++ rdf.cpp -o rdf_executable
-# Run the rdf executable
-./rdf_executable $Nbinsrdf $Lbox
-
 # Remove the executables
 rm particles_executable
 rm histogram_executable
-rm rdf_executable
 
 # Text output as help
 echo "Execution completed successfully."
