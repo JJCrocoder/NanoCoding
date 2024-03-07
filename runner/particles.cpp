@@ -19,26 +19,27 @@ using namespace std;
 // In this case, vec is created outside the function, but modified inside of it
 void mic(float * vec, float Lbox) {
     for (int i = 0; i < 3 ; ++i) {
-        vec[i] -= floorf(0.5 + vec[i]/Lbox)*Lbox;
+        vec[i] -= floorf(0.5 + vec[i]/Lbox)*Lbox; // we apply the mic for each component
     }  
     return;
 }
 
-float mic_distance(float * Position_part_i, float *Position_part_j); {
+// We use the mic to calculate the image distance between 2 vectors
+float mic_distance(float * Position_part_i, float *Position_part_j, float Lbox); {
     float rij[dim];
     float mod2_rij; 
     for (int k = 0; k < 3; ++k)
     {
         rij[k] = Position_part_j[k] - Position_part_i[k];
-        rij[k] -= L_box * floorf(rij[k] / L_box + 0.5); 
+        mic(rij, Lbox)
         mod2_rij += rij[k]*rij[k];
     }
     return sqrt(mod2_rij);
 }
 
-//We declare the random generator functions
 
-float uniform(double min, double max) { // Random real number in an uniform distrobution
+//We define the random generator functions
+float uniform(float min, float max) { // Random real number in an uniform distribution
     return min + (max-min)*rand()/RAND_MAX;
 }
 
@@ -46,7 +47,13 @@ int rand_num(int min, int max) { // Random integer number in an uniform discrete
     return rand() % (max-min+1) + min;
 }
 
-// Function definition
+float randn(float mean, float var) {// Random real number in a gausian distribution
+	default_random_engine generator; // we define the number generator
+	normal_distribution<double> distribution(mean,var); // We define the distribution
+	return distribution(generator);
+}
+
+// Various function definitions
 float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
 
 // Global variables
@@ -147,7 +154,7 @@ int main(int argc, char *argv[]) {
                         Pos_j[k] = Position[j * N_dim + k];
                     }
                     //Take into consideration the MIC (Minimum Image Convention) and calculate the distance between particle i and j
-                    float dist = mic_distance(Pos_i, Pos_j);
+                    float dist = mic_distance(Pos_i, Pos_j, Lbox);
                     //Analyze if such distance is inside the range of our histogram
                     if (dist > dmax) continue;
 		    //Calculate to which bin such distance belongs
