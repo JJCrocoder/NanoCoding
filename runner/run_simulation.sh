@@ -8,6 +8,8 @@ density=${2:-0.7}         #Density of particles
 temp=${3:-1.9}            #Bath temperature of the system
 Nsteps=${4:-50000}        #Number of steps for montecarlo
 Nbins=${5:-50}            #Number of bins
+Nbinsrdf=${6:-50}         #Number of bins for rdf calculation
+Lbox=${7:-10}             #Default box length
 
 # Compile particles.cpp
 g++ particles.cpp -o particles_executable
@@ -32,6 +34,7 @@ for i in $(seq 1 $Niter); do
 
     # Create a file of the last 300 energy data (Here the append operator ">>" is used)
     tail -300 "./energies/energy$i.txt" >> "energies/equilibrium_energies.txt"
+    tail -100 "./positions/position$i.txt" >> "positions/equilibrium_positions.txt"
 done
 
 # Compile histogram.cpp
@@ -51,4 +54,5 @@ echo "  Number of iterations"
 echo "  Density of particles"
 echo "  Bath temperature of the system"
 echo "  Number of steps for montecarlo"
-echo "  Number of bins"
+echo "  Number of bins for energy histogram"
+echo "  Number of bins for rdf representation"
