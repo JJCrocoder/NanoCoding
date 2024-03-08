@@ -1,16 +1,31 @@
+// LIBRARIES/HEADERS INCLUDED
+
+// <iostream>: input and output operations
+// <fstream>: file manipulation
+// <cmath>: Mathematical functions and constants
+// <random>: classes and functions for generating random numbers and sampling from different pdf
+// <cstdlib>: Is a general header with some data management classes an functions: memory, random gen, type conversion...
+// <vector>: dynamic arrays and automatic memory management
+
 #include <cstdlib>
 #include <random>
 #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <vector>
+
+// This allow to use declarations in "std" namespace without calling it
+// Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
 using namespace std;
 
+// typedef creates a type for our program. In this case, the type is "verletstep", wich is kind of a copy
+// of the standard type "enum". We define as "VERLETSTEP1" and "VERLETSTEP2" the values a variable of type
+// "verletstep" can take
 typedef enum {VERLETSTEP1, VERLETSTEP2} verletstep;
 
 // Periodic boundary conditions (Minimum image convention)
 void mic(float * vec, float Lbox) {
-    for (int k = 0; k < 3 ; ++k) vec[k] -= floorf(0.5 + vec[k]/Lbox)*Lbox;
+    for (int k = 0; k < dim ; ++k) vec[k] -= floorf(0.5 + vec[k]/Lbox)*Lbox;
     return;
 }
 
@@ -33,7 +48,11 @@ float deltaT = 0.005;
 float density = 0.1;
 int Npart=(int)(density*volume);
 
-// Main function
+// MAIN FUNCTION
+// The compiled executable can get some data as input
+// "argc" gives the number or arguments that the function has accepted as input, including the exceuting command
+// "argv" is an array (string type) that includes each of the arguments given as inputs
+// For example, if we run "./main 5 3.0" as an executable: argc = 3, argv = {"./main", "5", "3.0"}
 int main(int argc, char *argv[]) {
 
     // Variables
