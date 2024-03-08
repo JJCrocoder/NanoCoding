@@ -65,16 +65,17 @@ int main(int argc, char *argv[]) {
 
     // Open data files
     ofstream fich_pos;
-    fich_pos.open("virus6836.txt");
+    fich_pos.open("positions.txt");
 
     // Generate initial positions
-    float pos;
-    vector<float> x;
-    fstream positions("equilibrio.txt");
-    while (positions >> pos) x.push_back(pos);
-    positions.close();
-    for (int i = 0; i < 3*Npart; ++i) Pos[i] = x[i];
-    cout << "...Initial positions generated" <<endl;
+    float pos;            // An auxiliar variable for storing positions
+    vector<float> x;      // A vector array (of variable size) that stores all the initial configuration
+    fstream positions("equilibrio.txt"); // We read de equilibrium initial configuration file
+    // for each data in the file we store in position an then at the end of the "x" vector array
+    while (positions >> pos) x.push_back(pos);    
+    positions.close();    // We close the input file
+    for (int i = 0; i < dim*Npart; ++i) Pos[i] = x[i];  // We store the initial configuration in the positions array
+    cout << "...Initial positions generated" <<endl;    // Log of the initial configuration reading
 
     // Generate initial velocities
     generateInitialVelocities(Vel);
@@ -123,20 +124,20 @@ void generateInitialVelocities(float Vel[]) {
     uniform_real_distribution<> gauss(0.0, temp);
     
     // Generate gaussian velocities
-    for (int i = 0; i < 3*Npart; ++i) Vel[i] = gauss(generator);
+    for (int i = 0; i < dim*Npart; ++i) Vel[i] = gauss(generator);
 }
 
 // Verlet algorithm for update particles position
 void moveVerlet(verletstep vstep, float Pos[], float Vel[], float For[]){
+    // We use a "switch" statement for executing a block depending on the value given for the variable vstep
     switch (vstep) {
     case VERLETSTEP1:
         // Loop for update each particle
         for (int i = 0; i < Npart; ++i) { 
             for (int k = 0; k < dim; ++k) {
                 // Update position using Verlet method
-                Pos[i * dim + k] += Vel[i * dim + k]*deltaT+ For[i * dim + k]*deltaT*deltaT*0.5;
+                Pos[i * dim + k] += Vel[i * dim + k] * deltaT + For[i * dim + k]*deltaT*deltaT*0.5;
                 Vel[i * dim + k] += For[i * dim + k] * deltaT * 0.5;
-
                 // Apply periodic boundary conditions
                 Pos[i * dim + k] -= floorf(0.5 + Pos[i * dim + k]/Lbox)*Lbox;
             }
@@ -146,7 +147,7 @@ void moveVerlet(verletstep vstep, float Pos[], float Vel[], float For[]){
         // Loop for update each particle
         for (int i = 0; i < Npart; ++i) { 
             for (int k = 0; k < dim; ++k) {
-                // Update position using Verlet method
+                // Update velocity using Verlet method
                 Vel[i * dim + k] += For[i * dim + k] * deltaT * 0.5;
                 
                 // Apply periodic boundary conditions
