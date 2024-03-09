@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     // Generate initial positions
     float pos;            // An auxiliar variable for storing positions
     vector<float> x;      // A vector array (of variable size) that stores all the initial configuration
-    fstream positions("equilibrio.txt"); // We read de equilibrium initial configuration file
+    fstream positions("equilibrium.txt"); // We read de equilibrium initial configuration file
     // for each data in the file we store in position an then at the end of the "x" vector array
     while (positions >> pos) x.push_back(pos);    
     positions.close();    // We close the input file
