@@ -31,9 +31,9 @@ void mic(float * vec, float Lbox) {
 
 // Function prototypes
 void generateInitialVelocities(float Vel[]);
-void moveVerlet(verletstep vstep, float Pos[], float Vel[], float For[]);
-void forces(float Pos[], float For[]);
-float temperature(float Vel[]);
+void moveVerlet(verletstep vstep, float *Pos, float *Vel, float *For);
+void forces(float *Pos, float *For);
+float temperature(float *Vel);
 
 // Global variables
 const float sigma = 1.0;
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
 }
 
 // Generate the gaussian initial velocities
-void generateInitialVelocities(float Vel[]) {
+void generateInitialVelocities(float *Vel) {
     random_device rand_dev;
     mt19937 generator(rand_dev());
     float temp = 1.9;
@@ -128,7 +128,7 @@ void generateInitialVelocities(float Vel[]) {
 }
 
 // Verlet algorithm for update particles position
-void moveVerlet(verletstep vstep, float Pos[], float Vel[], float For[]){
+void moveVerlet(verletstep vstep, float *Pos, float *Vel, float *For){
     // We use a "switch" statement for executing a block depending on the value given for the variable vstep
     switch (vstep) {
     case VERLETSTEP1:
@@ -136,8 +136,8 @@ void moveVerlet(verletstep vstep, float Pos[], float Vel[], float For[]){
         for (int i = 0; i < Npart; ++i) { 
             for (int k = 0; k < dim; ++k) {
                 // Update position using Verlet method
-                Pos[i * dim + k] += Vel[i * dim + k] * deltaT + For[i * dim + k]*deltaT*deltaT*0.5;
                 Vel[i * dim + k] += For[i * dim + k] * deltaT * 0.5;
+                Pos[i * dim + k] += Vel[i * dim + k] * deltaT;
                 // Apply periodic boundary conditions
                 Pos[i * dim + k] -= floorf(0.5 + Pos[i * dim + k]/Lbox)*Lbox;
             }
@@ -149,9 +149,6 @@ void moveVerlet(verletstep vstep, float Pos[], float Vel[], float For[]){
             for (int k = 0; k < dim; ++k) {
                 // Update velocity using Verlet method
                 Vel[i * dim + k] += For[i * dim + k] * deltaT * 0.5;
-                
-                // Apply periodic boundary conditions
-                Pos[i * dim + k] -= floorf(0.5 + Pos[i * dim + k]/Lbox)*Lbox;
             }
         }
     break;
@@ -160,7 +157,7 @@ void moveVerlet(verletstep vstep, float Pos[], float Vel[], float For[]){
 }
 
 // Algorithm for update particles forces
-void forces(float Pos[], float For[]) {
+void forces(float *Pos, float *For) {
     float r_2cut = r_cut * r_cut;
 
     // Set the forces to zero
@@ -199,9 +196,9 @@ void forces(float Pos[], float For[]) {
 }
 
 // Temperature calculation
-float temperature(float Vel[]){
+float temperature(float *Vel){
     float temp=0.;
-    for (int i = 0; i < 3*Npart; ++i) temp += Vel[i]*Vel[i];
-    temp /= 3*Npart;
+    for (int i = 0; i < dim*Npart; ++i) temp += Vel[i]*Vel[i];
+    temp /= dim*Npart;
     return temp;
 }
