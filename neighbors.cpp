@@ -19,15 +19,18 @@ using namespace std;
 int getcell(float *pos);
 
 int dim = 3;
+int ncells = 20;
 
 //Following C++ logic (what i understand) is better to implement this as part of the code instead of doing a function
 void make_linked_list(); //Fills head and list with the current system state
 void heal_list(int cella, int cellb); //Recalculates cella and cellb in head and list
 
+mcells = ncells*ncells*ncells;
+
 //Neighbour list head and list creation
 vector<int> list, head;
 for(int i=0, i<natoms, ++i) list[i] = -1;
-for(int icel=0, icel<ncel, ++icel) head[icel] = -1;
+for(int icel=0, icel<mcells, ++icel) head[icel] = -1;
 
 /* build head and list */
 for(int i=0, i<natoms, ++i){   // We go trough all the particles
@@ -41,15 +44,16 @@ for(int i=0, i<natoms, ++i){   // We go trough all the particles
 }
 
 //function creation
-int getcell(temppos){
+int getcell(normpos){ // IMPORTANT: We use as an argument the nromalized position by the box length
     //initialization of variables 
     int icell_dim[dim];
-    for (int k = 0 ; k < dim; ++k) icell_dim[k]= (int)(1 + (0.5 + temppos[k])*ncells); //since we are dividing the space in cubes, the ncells in each direction is the same
+    //since we are dividing the space in cubes, the ncells in each direction is the same
+    for (int k = 0 ; k < dim; ++k) icell_dim[k]= (int)(1 + (0.5 + normpos[k])*ncells);
     int icell = icell_dim[0]+(icell_dim[1]-1)*ncells+(icell_dim[2]-1)*ncells*ncells ;
     return icell
 }
 
-//implementation into the code od teh logic above
+//implementation into the code of the logic above
 
 //** Compute the energy of the itag particle when it is located in pos=postag**//
 //Use head and list neigbour search****//
