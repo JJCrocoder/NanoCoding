@@ -144,38 +144,51 @@ se llame f_iJ. Cuando se hayan dado todas las pairwise interactions, sale un f_i
 de fuerzas a la posición del itag*/
     float force[Npart*dim] //Definimos aquí el vector donde vamos a acumular las fuerzas
     float r_cut=2*sigma
+    for (i=0; i< Npart*dim ; ++i) force[i]=0
     for (i=0; i < Npart; ++i){
-        float force_iJ[dim]={0.0}; //Definimos la variable donde vamos a guardar los resultados pairwise
-        float Pos_itag[dim]={0.0};
-        for (int k=0; k< dim; ++k) float Pos_itag[k]=Position[itag*dim+k];
-        for (j=i+1; j< Npart-1; ++j){
-            //Definimos algunas variables
-            float r_2cut = r_cut * r_cut;
-            float r2_Ij=0.0;
-            float vec_dist[dim];
-            float u_Ij = 0.0; //esta es la energia y encima el vector distancia (useful)
-            for (int k = 0; k < dim; ++k){
-                vec_dist[k] = (Pos_itag[k] - Position[i * dim + k]);
-                mic(vec_dist, Lbox);
-                r2_Ij += pow(vec_dist[k], 2); 
-            }  
-            //lennard-jones potential
-            
-            if (r2_Ij < r_2cut){
-                float r_mod = sqrt(r2_Ij);
-                float r6 = pow((sigma/r_mod), 6.0);
-                float rc6 = pow((sigma/r_cut), 6.0);
-                
-                u_Ij = 4 * epsilon * (r6*(r6-1) - rc6*(rc6-1));
+      float Pos_itag[dim]={0.0};
+      for (int k=0; k< dim; ++k) float Pos_itag[k]=Position[i*dim+k];
+      for (j=i+1; j< Npart-1; ++j){
+          //Definimos algunas variables
+          float r_2cut = r_cut * r_cut;
+          float r2_Ij=0.0;
+          float vec_dist[dim];
+          float u_Ij = 0.0; //esta es la energia y encima el vector distancia (useful)
+          for (int k = 0; k < dim; ++k){
+              vec_dist[k] = (Pos_itag[k] - Position[j * dim + k]);
+              mic(vec_dist, Lbox);
+              r2_Ij += pow(vec_dist[k], 2); 
+          }  
+          //lennard-jones potential
+          
+          if (r2_Ij < r_2cut){
+              float r_mod = sqrt(r2_Ij);
+              float r6 = pow((sigma/r_mod), 6.0);
+              float rc6 = pow((sigma/r_cut), 6.0);
+              
+              float f_ij = -48 * epsilon * r6 (r6-0.5)/r_mod;
 
-                for (int k =0;k<dim;++k) force_Ij[k] += -u_Ij*vect_dist[k]/r_mod;                
+              for (int k =0;k<dim;++k) {
+                force[dim*i + k] -= (f_ij*vect_dist[k]/r_mod);    
+                force[dim*j + k] += (f_ij*vect_dist[k]/r_mod);
+              }
             }
         }
-        for (int k =0;k<dim;++k) force[i*dim+k] = force_Ij[k];                
-
     }
-    return force;
+  return force 
 }
+
+float moveEuler(float Position[], float For[], float deltat){
+  for (i = 0; i < Npart; ++i){
+    for (k=0;k<dim;++k){
+      Position[i*dim+k]+=0.5*deltat*For[i*dim+k];
+
+      //apply PBC 
+      Position[i*dim+k] -= floorf(0.5+Position[i*dim+k]/Lbox)*Lbox;
+    }
+  }
+}
+
 
 
 // random_device rand_dev;

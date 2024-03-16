@@ -41,6 +41,17 @@ int getcell(temppos){
     return icell
 }
 
+
+int get_N_cell(temppos){
+    int icell_dim[dim];
+    for (int k = 0 ; k < dim; ++k) icell_dim[k]= (int)(1 + (0.5 + temppos[k])*ncells);
+    for (int i=0; i < 6 ; ++i ){
+        int jcell_dim[dim]={0}
+        
+    }
+
+}
+
 //implementation into the code od teh logic above
 
 //** Compute the energy of the itag particle when it is located in pos=postag**//
@@ -76,3 +87,7 @@ if(icell==0) return ncells;
 else if(icell==ncells+1) return 1;
 else return icell;
 }
+
+
+
+
