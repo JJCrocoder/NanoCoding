@@ -9,22 +9,19 @@ void heal_list(int cella, int cellb); //Recalculates cella and cellb in head and
 void mic(float * vec, float Lbox);
 int pbc_cells(int icell);
 
+// We calculate the number of cells in each dimension
+float cellsize = 1.15 * r_cut;		// A bit bigger than r_cut
+int ncells = (int)(Lbox/cellsize);	// we obtain the number of cells
 
-int ncells = 20;
-int natoms = 100;
-int dim = 3;
-float Lbox = 20; 
-
-
-float mcells = ncells*ncells*ncells;
+float mcells = ncells*ncells*ncells;	// Now the total number of cells
 
 void make_linked_list(float *pos, vector<int> list, vector<int> head){
   //Neighbour list head and list creation
-  for(int i=0; i<natoms; ++i) list[i] = -1;
+  for(int i=0; i<Npart; ++i) list[i] = -1;
   for(int icel=0; icel<mcells; ++icel) head[icel] = -1;
   /* build head and list */
 
-  for(int i=0; i<natoms; ++i){   // We go trough all the particles
+  for(int i=0; i<Npart; ++i){   // We go trough all the particles
     float temppos[dim] = {0};  // For each particle, we initialize an auxiliar position vector 
       for(int k=0; k<dim; ++k) temppos[k] = pos[dim*i+k]; // We store the coordinates in the auxiñiar vector 
       mic(temppos, Lbox);    // Fold the position of particle i using mic
