@@ -4,16 +4,18 @@
 // <fstream>: file manipulation
 // <cmath>: Mathematical functions and constants
 // <random>: classes and functions for generating random numbers and sampling from different pdf
-
 #include <iostream>
 #include <cmath>
 #include <fstream>
 #include <random>
-#include "../neighbors.h"
 
 // This allow to use declarations in "std" namespace without calling it
 // Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
 using namespace std;
+
+// the ".h" libraries are refered to files that have been created to be modified outside from this program
+#include "../neighbors.h"
+#include "parameters.h"
 
 const double pi = 3.14159265358979323846;
 
