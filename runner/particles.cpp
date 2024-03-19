@@ -17,8 +17,6 @@ using namespace std;
 #include "parameters.h"
 const double pi = 3.14159265358979323846;
 float volume = pow(Lbox,dim);
-int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
-float dens = Npart/volume;		// And fix the real density value
 
 // the ".h" libraries are refered to files that have been created to be modified outside from this program
 #include "../neighbors.h"
@@ -43,6 +41,10 @@ float DeltaX = (dmax - dmin)/num_bins;
 // For this code, the arguments should be the system density, temperature and number of simulation steps.
 int main(int argc, char *argv[]) {
 
+    float densinput = atof(argv[1]); 	// We store the input density
+    float Temp = atof(argv[2]);		// Same for temperature
+    int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
+    float dens = Npart/volume;		// And fix the real density value	
     // Variables
     int nsamp_ener = 10;		// Steps for energy sampling
     int nsamp_pos = 100;		// Steps for position sampling
