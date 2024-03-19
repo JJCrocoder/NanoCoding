@@ -3,13 +3,10 @@
 # The initial sentence allows the file to use the bash shell (Thus, the therminal command window)
 
 # Set default input values: the general structure is var_name=${input_numer:-default_value}
-Niter=${1:-3}             #Number of iterations
-density=${2:-0.7}         #Density of particles
-Temp=${3:-1.9}            #Bath Temperature of the system
-Nsteps=${4:-50000}        #Number of steps for montecarlo
-Nbins=${5:-50}            #Number of bins
-Nbinsrdf=${6:-50}         #Number of bins for rdf calculation
-Lbox=${7:-10}             #Default box length
+density=${1:-0.7}         # Density of particles
+Temp=${2:-1.9}            # Bath Temperature of the system
+Nbinsrdf=${3:-50}         # Number of bins for rdf calculation
+Niter=${4:-4}             # Number of simulations 
 
 # Compile particles.cpp
 g++ particles.cpp -o particles_executable
@@ -26,7 +23,7 @@ for i in $(seq 1 $Niter); do
     echo "Iteration $i ..............." # Printing command
 
     # Run the executable
-    ./particles_executable $density $Temp $Nsteps
+    ./particles_executable $density $Temp
 
     # Rename and save the files with "mv" command
     mv position.txt ./positions/position$i.txt
@@ -50,9 +47,7 @@ rm histogram_executable
 echo "Execution completed successfully."
 echo ""
 echo "Variables to add:"
-echo "  Number of iterations"
 echo "  Density of particles"
 echo "  Bath Temperature of the system"
-echo "  Number of steps for montecarlo"
-echo "  Number of bins for energy histogram"
 echo "  Number of bins for rdf representation"
+echo "  Number of iterations"
