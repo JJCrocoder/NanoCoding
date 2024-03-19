@@ -5,7 +5,7 @@
 # Set default input values: the general structure is var_name=${input_numer:-default_value}
 Niter=${1:-3}             #Number of iterations
 density=${2:-0.7}         #Density of particles
-temp=${3:-1.9}            #Bath temperature of the system
+Temp=${3:-1.9}            #Bath Temperature of the system
 Nsteps=${4:-50000}        #Number of steps for montecarlo
 Nbins=${5:-50}            #Number of bins
 Nbinsrdf=${6:-50}         #Number of bins for rdf calculation
@@ -26,7 +26,7 @@ for i in $(seq 1 $Niter); do
     echo "Iteration $i ..............." # Printing command
 
     # Run the executable
-    ./particles_executable $density $temp $Nsteps
+    ./particles_executable $density $Temp $Nsteps
 
     # Rename and save the files with "mv" command
     mv position.txt ./positions/position$i.txt
@@ -52,7 +52,7 @@ echo ""
 echo "Variables to add:"
 echo "  Number of iterations"
 echo "  Density of particles"
-echo "  Bath temperature of the system"
+echo "  Bath Temperature of the system"
 echo "  Number of steps for montecarlo"
 echo "  Number of bins for energy histogram"
 echo "  Number of bins for rdf representation"
