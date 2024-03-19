@@ -91,8 +91,3 @@ if(icell==-1) return ncells-1;
 else if(icell==ncells) return 0;
 else return icell;
 }
-
-void mic(float * vec, float Lbox) {
-    for (int k = 0; k < dim ; ++k) vec[k] -= floorf(0.5 + vec[k]/Lbox)*Lbox;
-    return;
-}
