@@ -13,20 +13,20 @@
 // Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
 using namespace std;
 
-// the ".h" libraries are refered to files that have been created to be modified outside from this program
+// Global variables or constants
 #include "parameters.h"
+const double pi = 3.14159265358979323846;
+float volume = pow(Lbox,dim);
+int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
+float dens = Npart/volume;		// And fix the real density value
+
+// the ".h" libraries are refered to files that have been created to be modified outside from this program
 #include "../neighbors.h"
 #include "../mic_pbc.h"
 #include "../my_random.h"
 
 // Various function definitions
 float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
-
-// Global variables or constants
-const double pi = 3.14159265358979323846;
-float volume = pow(Lbox,dim);
-int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
-float dens = Npart/volume;		// And fix the real density value
 
 // rdf variables
 float dmax = 0.5 * Lbox;
