@@ -17,25 +17,13 @@ using namespace std;
 #include "parameters.h"
 #include "../neighbors.h"
 #include "../mic_pbc"
+#include "../my_random"
 
+// Various function definitions
+float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
+
+// Global variables or constants
 const double pi = 3.14159265358979323846;
-
-//We define the random generator functions
-float uniform(float min, float max) { // Random real number in an uniform distribution
-    return min + (max-min)*rand()/RAND_MAX;
-}
-
-int rand_num(int min, int max) { // Random integer number in an uniform discrete distribution
-    return rand() % (max-min+1) + min;
-}
-
-float randn(float mean, float var) {// Random real number in a gausian distribution
-	default_random_engine generator; // we define the number generator
-	normal_distribution<double> distribution(mean,var); // We define the distribution
-	return distribution(generator);
-}
-
-// Global variables
 float volume = pow(Lbox,dim);
 int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
 float dens = Npart/volume;		// And fix the real density value
@@ -45,9 +33,6 @@ float dmax = 0.5 * Lbox;
 float dmin = 0.0;
 int num_bins = 100;
 float DeltaX = (dmax - dmin)/num_bins;
-
-// Various function definitions
-float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
 
 // MAIN FUNCTION
 
