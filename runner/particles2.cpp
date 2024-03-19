@@ -14,45 +14,11 @@
 using namespace std;
 
 // the ".h" libraries are refered to files that have been created to be modified outside from this program
-#include "../neighbors.h"
 #include "parameters.h"
+#include "../neighbors.h"
+#include "../mic_pbc"
 
 const double pi = 3.14159265358979323846;
-
-// Global variables
-float sigma = 1.0;
-float epsilon = 1.0;
-float Lbox = 10.0;
-float volume = Lbox*Lbox*Lbox;
-int dim = 3;
-float r_cut = 2.5 * sigma;
-
-// rdf variables
-float dmax = 0.5 * Lbox;
-float dmin = 0.0;
-int num_bins = 100;
-float DeltaX = (dmax - dmin)/num_bins;
-
-
-// Minimum image convention (periodic boundary conditions)
-// Void functons doesn't return anything but you can change an argument inside them
-// In this case, vec is created outside the function, but modified inside of it
-void mic(float * vec, float Lbox) {
-    for (int i = 0; i < 3 ; ++i) {
-        vec[i] -= floorf(0.5 + vec[i]/Lbox)*Lbox; // we apply the mic for each component
-    }  
-    return;
-}
-
-// We use the mic to calculate the image distance between 2 vectors
-float mic_distance(float * Position_part_i, float *Position_part_j, float Lbox) {
-    float rij[dim];
-    float mod2_rij = 0.0; 
-    for (int k = 0; k < 3; ++k) rij[k] = Position_part_j[k] - Position_part_i[k];
-    mic(rij, Lbox);
-    for (int k = 0; k < 3; ++k) mod2_rij += rij[k]*rij[k];;
-    return sqrt(mod2_rij);
-}
 
 //We define the random generator functions
 float uniform(float min, float max) { // Random real number in an uniform distribution
@@ -69,6 +35,17 @@ float randn(float mean, float var) {// Random real number in a gausian distribut
 	return distribution(generator);
 }
 
+// Global variables
+float volume = pow(Lbox,dim);
+int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
+float dens = Npart/volume;		// And fix the real density value
+
+// rdf variables
+float dmax = 0.5 * Lbox;
+float dmin = 0.0;
+int num_bins = 100;
+float DeltaX = (dmax - dmin)/num_bins;
+
 // Various function definitions
 float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
 
@@ -82,11 +59,6 @@ float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
 int main(int argc, char *argv[]) {
 
     // Variables
-    float densinput = atof(argv[1]); 	// We store the input density
-    float Temp = atof(argv[2]);		// Same for temperature
-    int Nstep = atof(argv[3]);		// And for the number of simulation steps
-    int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
-    float dens = Npart/volume;		// And fix the real density value
     int nsamp_ener = 10;		// Steps for energy sampling
     int nsamp_pos = 100;		// Steps for position sampling
     int naccept = 0;			// counter for accepted particle displacements
