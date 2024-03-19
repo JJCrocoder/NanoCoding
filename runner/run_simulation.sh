@@ -5,8 +5,7 @@
 # Set default input values: the general structure is var_name=${input_numer:-default_value}
 density=${1:-0.7}         # Density of particles
 Temp=${2:-1.9}            # Bath Temperature of the system
-Nbinsrdf=${3:-50}         # Number of bins for rdf calculation
-Niter=${4:-4}             # Number of simulations 
+Niter=${3:-4}             # Number of simulations 
 
 # Compile particles.cpp
 g++ particles.cpp -o particles_executable
@@ -34,14 +33,8 @@ for i in $(seq 1 $Niter); do
     tail -100 "./positions/position$i.txt" >> "positions/equilibrium_positions.txt"
 done
 
-# Compile histogram.cpp
-g++ histogram.cpp -o histogram_executable
-# Run the histogram executable
-./histogram_executable $Nbins
-
 # Remove the executables
 rm particles_executable
-rm histogram_executable
 
 # Text output as help
 echo "Execution completed successfully."
@@ -49,5 +42,4 @@ echo ""
 echo "Variables to add:"
 echo "  Density of particles"
 echo "  Bath Temperature of the system"
-echo "  Number of bins for rdf representation"
 echo "  Number of iterations"
