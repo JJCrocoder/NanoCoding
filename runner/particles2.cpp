@@ -16,8 +16,8 @@ using namespace std;
 // the ".h" libraries are refered to files that have been created to be modified outside from this program
 #include "parameters.h"
 #include "../neighbors.h"
-#include "../mic_pbc"
-#include "../my_random"
+#include "../mic_pbc.h"
+#include "../my_random.h"
 
 // Various function definitions
 float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
