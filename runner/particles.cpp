@@ -25,6 +25,7 @@ float volume = pow(Lbox,dim);
 
 // Various function definitions
 float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
+float calculate_virial(float positions*);
 
 // rdf variables
 float dmax = 0.5 * Lbox;
@@ -143,13 +144,13 @@ int main(int argc, char *argv[]) {
     }
 
     // Normalization of the RDF histogram
-    cout<<"Distance\trdf"<<endl;
+    // cout<<"Distance\trdf"<<endl;
     for (int k = 0; k < num_bins; ++k) 
     {
         float rrr = dmin + DeltaX * (k + 0.5);
         float Nideal = 4.0 / 3.0 * pi * dens * (pow(rrr + 0.5*DeltaX, 3) - pow(rrr - 0.5*DeltaX, 3));
         float GR = Histo[k] / (Npart * Nideal * ncount);
-        cout << rrr << '\t' << GR << endl;
+        // cout << rrr << '\t' << GR << endl;
     }
 
     // Close data files
@@ -191,3 +192,21 @@ float Energy(float Position[], float Pos_itag[], int itag, int Npart) {
     }
     return U_tot;
 }
+
+// Function for virial calculations
+float calculate_virial(float Position*) {
+    float virial = 0.0;
+    for (int i = 0; i < N - 1; ++i) {
+        for (int j = i + 1; j < N; ++j) {
+		float rij[dim] = {0.0};
+	    	for(int k = 0; k<dim; ++k){
+			rij[k] = Position[j * dim + k] -  Position[j * dim + k];
+			// Quiero obtener la fuerza sin tener que crear arrays i, j
+			// Force[k] = 
+			// virial += rij[k]*Force[k];
+		}
+        }
+    }
+    return virial/(dim*volume);
+}
+
