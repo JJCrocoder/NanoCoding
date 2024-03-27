@@ -46,12 +46,12 @@ int main(int argc, char *argv[]) {
 
     // Open data files
     ofstream fich_pos;
-    fich_pos.open("virus6836.txt");
+    fich_pos.open("brownian_positions.txt");
 
     // Generate initial positions
     float pos;
     vector<float> x;
-    fstream positions("equilibrio.txt");
+    fstream positions("equilibrium_energies.txt");
     while (positions >> pos) x.push_back(pos);
     positions.close();
     for (int i = 0; i < 3*Npart; ++i) Pos[i] = x[i];
