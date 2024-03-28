@@ -18,14 +18,15 @@ using namespace std;
 const double pi = 3.14159265358979323846;
 float volume = pow(Lbox,dim);
 
-// the ".h" libraries are refered to files that have been created to be modified outside from this program
+// the ".h" libraries are refered to files that have been created to be modified outside
 #include "../neighbors.h"
 #include "../mic_pbc.h"
 #include "../my_random.h"
+#include "../my_potentials.h"
 
 // Various function definitions
-float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
-float calculate_virial(float positions*);
+float Int_Energy(float * Position, float * N_O_Pos, int itag, int Npart);
+float calculate_virial(float * Position);
 
 // rdf variables
 float dmax = 0.5 * Lbox;
@@ -83,8 +84,8 @@ int main(int argc, char *argv[]) {
         }
 	
         //Energies of the selected particle
-        Eold = Energy(Position, PosOld, itag, Npart);	// Current energy
-        Enew = Energy(Position, PosNew, itag, Npart);	// Modified Energy
+        Eold = Int_Energy(Position, PosOld, itag, Npart);	// Current energy
+        Enew = Int_Energy(Position, PosNew, itag, Npart);	// Modified Int_Energy
 
         prob = exp(-(Enew-Eold)/Temp);	// Probabiliy ratio
 
@@ -163,38 +164,30 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-// Lennard-jones energy function
-float Energy(float Position[], float Pos_itag[], int itag, int Npart) {
+// Interaction energy function
+float Int_Energy(float * Position, float * Pos_itag, int itag, int Npart) {
+    
     float U_tot = 0.0;
-    float r_2cut = r_cut * r_cut;
 
     // Loop for every particle except itag
     for (int i = 0; i < Npart; ++i)  {
         if (i == itag) continue;
-        float vec_dist[dim];
-        float u_ij = 0.0;
+        float vec_rij[dim];
         float r2_ij=0.0;
         
-        // Obtain the distances r_ij
-        for (int k = 0; k < dim; ++k) vec_dist[k] = (Pos_itag[k] - Position[i * dim + k]);        
-        mic(vec_dist, Lbox);
-        for (int k = 0; k < dim; ++k) r2_ij += vec_dist[k]*vec_dist[k]; 
+        // Obtain the distance r_ij
+        for (int k = 0; k < dim; ++k) vec_rij[k] = (Pos_itag[k] - Position[i * dim + k]); // Coordinates       
+        mic(vec_rij, Lbox);	// Applying MIC
+        for (int k = 0; k < dim; ++k) r2_ij += vec_rij[k]*vec_rij[k]; // Squared modulus
 
-        // Lennard-jones potential energy if we are under the cut
-        if (r2_ij < r_2cut) {
-            float r_mod = sqrt(r2_ij);
-	        float r6 = pow((sigma/r_mod), 6.0);
-	        float rc6 = pow((sigma/r_cut), 6.0);
-	        u_ij = 4 * epsilon * ((r6*r6-r6) - (rc6*rc6-rc6));   
-        }
-        // Save the total energy
-        U_tot += u_ij;
+        // pair interaction evaluation and addition
+        U_tot += lj_pot(r2_ij);	// Defined in an external file
     }
     return U_tot;
 }
 
 // Function for virial calculations
-float calculate_virial(float Position*) {
+float calculate_virial(float * Position) {
     float virial = 0.0;
     for (int i = 0; i < N - 1; ++i) {
         for (int j = i + 1; j < N; ++j) {
@@ -209,4 +202,5 @@ float calculate_virial(float Position*) {
     }
     return virial/(dim*volume);
 }
+
 
