@@ -1,4 +1,3 @@
-int Nstep = 50000;       // Number of simualtion steps
 int dim = 3;             // Dimensionality of the simulation
 float sigma = 1.0;       // Particle diameter
 float epsilon = 1.0;     // Characteristic energy

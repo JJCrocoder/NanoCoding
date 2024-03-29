@@ -26,7 +26,7 @@ float volume = pow(Lbox,dim);
 
 // Various function definitions
 float Int_Energy(float * Position, float * N_O_Pos, int itag, int Npart);
-float calculate_virial(float * Position);
+float calculate_virial(float * Position, int Npart);
 
 // rdf variables
 float dmax = 0.5 * Lbox;
@@ -48,18 +48,21 @@ int main(int argc, char *argv[]) {
     int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
     float dens = Npart/volume;		// And fix the real density value	
     // Variables
-    int nsamp_ener = 10;		// Steps for energy sampling
-    int nsamp_pos = 100;		// Steps for position sampling
+    int Nstep = 200*Npart;
+    int nsamp_ener = 4*Npart;		// Steps for energy sampling
+    int nsamp_pos = Npart;		// Steps for position sampling
     int naccept = 0;			// counter for accepted particle displacements
     int ncount = 0;			// 
     float deltaR = 0.1;			// Size of the metropolis random displacement
     float Position[dim*Npart];		// Particles positions array
     vector<int> Histo(num_bins, 0);  //Vector which elements are related with each one of the different bins
     float Const = 4.0 / 3.0 * dens * pi; //Constant needed for normalization
-	
+    float Int_Energy1 = 0.0;
+    
     // LOG of the run
     cout << " Density = "<< dens <<endl;
     cout << " Temperature = "<< Temp <<endl;
+    cout << " Number of particles  = "<< Npart <<endl;
 
     // Open data files
     ofstream fich_ener, fich_posi, fich_rdf;
@@ -69,7 +72,10 @@ int main(int argc, char *argv[]) {
 
     // Initial positions
     for (int i=0; i<dim*Npart; ++i) Position[i] = uniform(-0.5*Lbox, 0.5*Lbox);
-
+    cout << " Initial configuration created"<<endl;
+    cout << endl << "Begining of Montecarlo loop:"<<endl;
+    cout << "\t" << "Energy per particle"<<endl;
+    
     // Montecarlo loop
     for (int istep = 0; istep<Nstep; ++istep) 
     {
@@ -99,10 +105,15 @@ int main(int argc, char *argv[]) {
             naccept = naccept + 1;	// We add an accept
             Esample = Enew;		// The sampled energy is modified
         }
-  
+	Int_Energy1+= 0.5*Esample;
+	
         // Save sample energy and position
 	// Here we will also calculate the radial distribution function (rdf)
-        if (istep % nsamp_ener == 0) fich_ener << 0.5*Esample << endl; // Storing energy      
+        if (istep % nsamp_ener == 0) {
+	  fich_ener << Int_Energy1/nsamp_ener*Npart << endl; // Storing energy
+	  cout << "\t" << Int_Energy1/nsamp_ener <<endl;
+	  Int_Energy1 = 0;
+	}      
         if (istep % nsamp_pos == 0) 
 	{
             for (int i = 0; i < Npart - 1; ++i)	// For each particle
@@ -187,10 +198,10 @@ float Int_Energy(float * Position, float * Pos_itag, int itag, int Npart) {
 }
 
 // Function for virial calculations
-float calculate_virial(float * Position) {
+float calculate_virial(float * Position, int Npart) {
     float virial = 0.0;
-    for (int i = 0; i < N - 1; ++i) {
-        for (int j = i + 1; j < N; ++j) {
+    for (int i = 0; i < Npart - 1; ++i) {
+        for (int j = i + 1; j < Npart; ++j) {
 		float rij[dim] = {0.0};
 	    	for(int k = 0; k<dim; ++k){
 			rij[k] = Position[j * dim + k] -  Position[j * dim + k];

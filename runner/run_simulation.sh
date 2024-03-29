@@ -5,7 +5,7 @@
 # Set default input values: the general structure is var_name=${input_numer:-default_value}
 density=${1:-0.7}         # Density of particles
 Temp=${2:-1.9}            # Bath Temperature of the system
-Niter=${3:-4}             # Number of simulations 
+Niter=${3:-1}             # Number of simulations 
 
 # Compile particles.cpp
 g++ particles.cpp -o particles_executable
