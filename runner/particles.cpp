@@ -4,7 +4,6 @@
 // <fstream>: file manipulation
 // <cmath>: Mathematical functions and constants
 // <random>: classes and functions for generating random numbers and sampling from different pdf
-
 #include <iostream>
 #include <cmath>
 #include <fstream>
@@ -14,60 +13,26 @@
 // Most of the variables or operations tha we declarate are in this namespace, so this line is convenient
 using namespace std;
 
+// Global variables or constants
+#include "parameters.h"
 const double pi = 3.14159265358979323846;
+float volume = pow(Lbox,dim);
 
-// Global variables
-float sigma = 1.0;
-float epsilon = 1.0;
-float Lbox = 10.0;
-float volume = Lbox*Lbox*Lbox;
-int dim = 3;
-float r_cut = 2.5 * sigma;
+// the ".h" libraries are refered to files that have been created to be modified outside
+#include "../neighbors.h"
+#include "../mic_pbc.h"
+#include "../my_random.h"
+#include "../my_potentials.h"
+
+// Various function definitions
+float Int_Energy(float * Position, float * N_O_Pos, int itag, int Npart);
+float calculate_virial(float * Position, int Npart);
 
 // rdf variables
 float dmax = 0.5 * Lbox;
 float dmin = 0.0;
 int num_bins = 100;
 float DeltaX = (dmax - dmin)/num_bins;
-
-
-// Minimum image convention (periodic boundary conditions)
-// Void functons doesn't return anything but you can change an argument inside them
-// In this case, vec is created outside the function, but modified inside of it
-void mic(float * vec, float Lbox) {
-    for (int i = 0; i < dim ; ++i) {
-        vec[i] -= floorf(0.5 + vec[i]/Lbox)*Lbox; // we apply the mic for each component
-    }  
-    return;
-}
-
-// We use the mic to calculate the image distance between 2 vectors
-float mic_distance(float * Position_part_i, float *Position_part_j, float Lbox) {
-    float rij[dim];
-    float mod2_rij; 
-    for (int k = 0; k < dim; ++k) rij[k] = Position_part_j[k] - Position_part_i[k];
-    mic(rij, Lbox);
-    for (int k = 0; k < dim; ++k) mod2_rij += rij[k]*rij[k];
-    return sqrt(mod2_rij);
-}
-
-//We define the random generator functions
-float uniform(float min, float max) { // Random real number in an uniform distribution
-    return min + (max-min)*rand()/RAND_MAX;
-}
-
-int rand_num(int min, int max) { // Random integer number in an uniform discrete distribution
-    return rand() % (max-min+1) + min;
-}
-
-float randn(float mean, float var) {// Random real number in a gausian distribution
-	default_random_engine generator; // we define the number generator
-	normal_distribution<double> distribution(mean,var); // We define the distribution
-	return distribution(generator);
-}
-
-// Various function definitions
-float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
 
 // MAIN FUNCTION
 
@@ -78,24 +43,26 @@ float Energy(float Position[], float N_O_Pos[], int itag, int Npart);
 // For this code, the arguments should be the system density, temperature and number of simulation steps.
 int main(int argc, char *argv[]) {
 
-    // Variables
     float densinput = atof(argv[1]); 	// We store the input density
     float Temp = atof(argv[2]);		// Same for temperature
-    int Nstep = atof(argv[3]);		// And for the number of simulation steps
     int Npart=(int)(densinput*volume);	// We calculate the number of particles with the density
-    float dens = Npart/volume;		// And fix the real density value
-    int nsamp_ener = 10;		// Steps for energy sampling
-    int nsamp_pos = 100;		// Steps for position sampling
+    float dens = Npart/volume;		// And fix the real density value	
+    // Variables
+    int Nstep = 200*Npart;
+    int nsamp_ener = 4*Npart;		// Steps for energy sampling
+    int nsamp_pos = Npart;		// Steps for position sampling
     int naccept = 0;			// counter for accepted particle displacements
     int ncount = 0;			// 
     float deltaR = 0.1;			// Size of the metropolis random displacement
     float Position[dim*Npart];		// Particles positions array
     vector<int> Histo(num_bins, 0);  //Vector which elements are related with each one of the different bins
     float Const = 4.0 / 3.0 * dens * pi; //Constant needed for normalization
-	
+    float Int_Energy1 = 0.0;
+    
     // LOG of the run
     cout << " Density = "<< dens <<endl;
     cout << " Temperature = "<< Temp <<endl;
+    cout << " Number of particles  = "<< Npart <<endl;
 
     // Open data files
     ofstream fich_ener, fich_posi, fich_rdf;
@@ -105,7 +72,10 @@ int main(int argc, char *argv[]) {
 
     // Initial positions
     for (int i=0; i<dim*Npart; ++i) Position[i] = uniform(-0.5*Lbox, 0.5*Lbox);
-
+    cout << " Initial configuration created"<<endl;
+    cout << endl << "Begining of Montecarlo loop:"<<endl;
+    cout << "\t" << "Energy per particle"<<endl;
+    
     // Montecarlo loop
     for (int istep = 0; istep<Nstep; ++istep) 
     {
@@ -120,8 +90,8 @@ int main(int argc, char *argv[]) {
         }
 	
         //Energies of the selected particle
-        Eold = Energy(Position, PosOld, itag, Npart);	// Current energy
-        Enew = Energy(Position, PosNew, itag, Npart);	// Modified Energy
+        Eold = Int_Energy(Position, PosOld, itag, Npart);	// Current energy
+        Enew = Int_Energy(Position, PosNew, itag, Npart);	// Modified Int_Energy
 
         prob = exp(-(Enew-Eold)/Temp);	// Probabiliy ratio
 
@@ -135,10 +105,15 @@ int main(int argc, char *argv[]) {
             naccept = naccept + 1;	// We add an accept
             Esample = Enew;		// The sampled energy is modified
         }
-
+	Int_Energy1+= 0.5*Esample;
+	
         // Save sample energy and position
 	// Here we will also calculate the radial distribution function (rdf)
-        if (istep % nsamp_ener == 0) fich_ener << 0.5*Esample << endl; // Storing energy      
+        if (istep % nsamp_ener == 0) {
+	  fich_ener << Int_Energy1/nsamp_ener*Npart << endl; // Storing energy
+	  cout << "\t" << Int_Energy1/nsamp_ener <<endl;
+	  Int_Energy1 = 0;
+	}      
         if (istep % nsamp_pos == 0) 
 	{
             for (int i = 0; i < Npart - 1; ++i)	// For each particle
@@ -150,7 +125,6 @@ int main(int argc, char *argv[]) {
 	        fich_posi << endl;	// Every particle is a diferent line
 
 		// RDF
-
 		    
 		if (i == Npart) continue; // We don't count the last particle in "i" index for RDF calculation
 		    
@@ -158,11 +132,14 @@ int main(int argc, char *argv[]) {
                 for (int j = i + 1; j < Npart; ++j) {
                     float Pos_i[dim];
                     float Pos_j[dim];
+		    float rij[dim];
 
                     for (int k = 0; k < dim; ++k) {
                         Pos_i[k] = Position[i * dim + k];
                         Pos_j[k] = Position[j * dim + k];
+			rij[k] = Pos_j[k] - Pos_i[k];
                     }
+		   
                     //Take into consideration the MIC (Minimum Image Convention)
                     float dist = mic_distance(Pos_i, Pos_j, Lbox);
                     //Analyze if such distance is inside the range of our histogram
@@ -179,12 +156,13 @@ int main(int argc, char *argv[]) {
     }
 
     // Normalization of the RDF histogram
+    // cout<<"Distance\trdf"<<endl;
     for (int k = 0; k < num_bins; ++k) 
     {
         float rrr = dmin + DeltaX * (k + 0.5);
         float Nideal = 4.0 / 3.0 * pi * dens * (pow(rrr + 0.5*DeltaX, 3) - pow(rrr - 0.5*DeltaX, 3));
         float GR = Histo[k] / (Npart * Nideal * ncount);
-        fich_rdf << rrr << ' ' << GR << endl;
+        // cout << rrr << '\t' << GR << endl;
     }
 
     // Close data files
@@ -197,32 +175,43 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-// Lennard-jones energy function
-float Energy(float Position[], float Pos_itag[], int itag, int Npart) {
+// Interaction energy function
+float Int_Energy(float * Position, float * Pos_itag, int itag, int Npart) {
+    
     float U_tot = 0.0;
-    float r_2cut = r_cut * r_cut;
 
     // Loop for every particle except itag
     for (int i = 0; i < Npart; ++i)  {
         if (i == itag) continue;
-        float vec_dist[dim];
-        float u_ij = 0.0;
+        float vec_rij[dim];
         float r2_ij=0.0;
         
-        // Obtain the distances r_ij
-        for (int k = 0; k < dim; ++k) vec_dist[k] = (Pos_itag[k] - Position[i * dim + k]);        
-        mic(vec_dist, Lbox);
-        for (int k = 0; k < dim; ++k) r2_ij += vec_dist[k]*vec_dist[k]; 
+        // Obtain the distance r_ij
+        for (int k = 0; k < dim; ++k) vec_rij[k] = (Pos_itag[k] - Position[i * dim + k]); // Coordinates       
+        mic(vec_rij, Lbox);	// Applying MIC
+        for (int k = 0; k < dim; ++k) r2_ij += vec_rij[k]*vec_rij[k]; // Squared modulus
 
-        // Lennard-jones potential energy if we are under the cut
-        if (r2_ij < r_2cut) {
-            float r_mod = sqrt(r2_ij);
-	        float r6 = pow((sigma/r_mod), 6.0);
-	        float rc6 = pow((sigma/r_cut), 6.0);
-	        u_ij = 4 * epsilon * ((r6*r6-r6) - (rc6*rc6-rc6));   
-        }
-        // Save the total energy
-        U_tot += u_ij;
+        // pair interaction evaluation and addition
+        U_tot += lj_pot(r2_ij);	// Defined in an external file
     }
     return U_tot;
 }
+
+// Function for virial calculations
+float calculate_virial(float * Position, int Npart) {
+    float virial = 0.0;
+    for (int i = 0; i < Npart - 1; ++i) {
+        for (int j = i + 1; j < Npart; ++j) {
+		float rij[dim] = {0.0};
+	    	for(int k = 0; k<dim; ++k){
+			rij[k] = Position[j * dim + k] -  Position[j * dim + k];
+			// Quiero obtener la fuerza sin tener que crear arrays i, j
+			// Force[k] = 
+			// virial += rij[k]*Force[k];
+		}
+        }
+    }
+    return virial/(dim*volume);
+}
+
+
