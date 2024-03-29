@@ -4,8 +4,7 @@ using namespace std;
 
 //function declaration
 int getcell(float *pos, int *cell);
-     //Fills head and list with the current system state
-void make_linked_list(float *pos, vector<int> list, vector<int> head, int Npart); 
+void make_linked_list(); //Fills head and list with the current system state
 void heal_list(int cella, int cellb); //Recalculates cella and cellb in head and list
 void mic(float * vec, float Lbox);
 int pbc_cells(int icell);
@@ -16,7 +15,7 @@ int ncells = (int)(Lbox/cellsize);	// we obtain the number of cells
 
 float mcells = ncells*ncells*ncells;	// Now the total number of cells
 
-void make_linked_list(float *pos, vector<int> list, vector<int> head, int Npart){
+void make_linked_list(float *pos, vector<int> list, vector<int> head){
   //Neighbour list head and list creation
   for(int i=0; i<Npart; ++i) list[i] = -1;
   for(int icel=0; icel<mcells; ++icel) head[icel] = -1;
