@@ -113,31 +113,34 @@ int main(int argc, char *argv[]) {
 	  fich_ener << Int_Energy1/nsamp_ener*Npart << endl; // Storing energy
 	  cout << "\t" << Int_Energy1/nsamp_ener <<endl;
 	  Int_Energy1 = 0;
-	}      
+	}   
+
+	// Positions an RDF
+	    
         if (istep % nsamp_pos == 0) 
 	{
             for (int i = 0; i < Npart - 1; ++i)	// For each particle
 	    {
+		// Saving positions
+		    
 		for (int k = 0; k < dim; ++k)		// For each component 
 		{
 		    fich_posi << Position[i * dim + k] << " "; // we store each component in a single line
 		}
 	        fich_posi << endl;	// Every particle is a diferent line
 
-		// RDF
 		    
+		// RDF   
 		if (i == Npart) continue; // We don't count the last particle in "i" index for RDF calculation
 		    
 		//We calculate the distances between every pair of particles   
                 for (int j = i + 1; j < Npart; ++j) {
                     float Pos_i[dim];
                     float Pos_j[dim];
-		    float rij[dim];
 
                     for (int k = 0; k < dim; ++k) {
                         Pos_i[k] = Position[i * dim + k];
                         Pos_j[k] = Position[j * dim + k];
-			rij[k] = Pos_j[k] - Pos_i[k];
                     }
 		   
                     //Take into consideration the MIC (Minimum Image Convention)
@@ -156,13 +159,13 @@ int main(int argc, char *argv[]) {
     }
 
     // Normalization of the RDF histogram
-    // cout<<"Distance\trdf"<<endl;
+    cout<<endl<<"\tDistance\trdf"<<endl;
     for (int k = 0; k < num_bins; ++k) 
     {
         float rrr = dmin + DeltaX * (k + 0.5);
-        float Nideal = 4.0 / 3.0 * pi * dens * (pow(rrr + 0.5*DeltaX, 3) - pow(rrr - 0.5*DeltaX, 3));
+        float Nideal = 4.0 * pi * dens * rrr * rrr;
         float GR = Histo[k] / (Npart * Nideal * ncount);
-        // cout << rrr << '\t' << GR << endl;
+        cout << '\t' << rrr << '\t' << GR << endl;
     }
 
     // Close data files
