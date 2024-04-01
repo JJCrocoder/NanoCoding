@@ -4,7 +4,7 @@ using namespace std;
 
 //function declaration
 int getcell(float *pos, int *cell);
-void make_linked_list(); //Fills head and list with the current system state
+void make_linked_list(float *pos, vector<int> list, vector<int> head, int Npart);  //Fills head and list with the current system state
 void heal_list(int cella, int cellb); //Recalculates cella and cellb in head and list
 void mic(float * vec, float Lbox);
 int pbc_cells(int icell);
@@ -15,7 +15,7 @@ int ncells = (int)(Lbox/cellsize);	// we obtain the number of cells
 
 float mcells = ncells*ncells*ncells;	// Now the total number of cells
 
-void make_linked_list(float *pos, vector<int> list, vector<int> head){
+void make_linked_list(float *pos, vector<int> list, vector<int> head, int Npart){
   //Neighbour list head and list creation
   for(int i=0; i<Npart; ++i) list[i] = -1;
   for(int icel=0; icel<mcells; ++icel) head[icel] = -1;
@@ -53,7 +53,7 @@ int getcell(float *normpos, int *cell){ // IMPORTANT: We use as an argument the 
    }
 
    vector<int> list, head;
-   make_linked_list (pos, list, head);
+   make_linked_list (pos, list, head, Npart);
 
    // We get the cell for every particle
    for(int i = 0; i<Npart; ++i){
