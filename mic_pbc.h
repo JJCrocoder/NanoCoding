@@ -14,6 +14,6 @@ float mic_distance(float * Position_part_i, float *Position_part_j, float Lbox) 
     float mod2_rij = 0.0; 
     for (int k = 0; k < 3; ++k) rij[k] = Position_part_j[k] - Position_part_i[k];
     mic(rij, Lbox);
-    for (int k = 0; k < 3; ++k) mod2_rij += rij[k]*rij[k];;
+    for (int k = 0; k < 3; ++k) mod2_rij += rij[k]*rij[k];
     return sqrt(mod2_rij);
 }
