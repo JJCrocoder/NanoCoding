@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
     vector<int> Histo(num_bins, 0);  //Vector which elements are related with each one of the different bins
     float Const = 4.0 / 3.0 * dens * pi; //Constant needed for normalization
     float Int_Energy1 = 0.0;
+    float virial_samp = 0.0;
     
     // LOG of the run
     cout << " Density = "<< dens <<endl;
@@ -75,7 +76,7 @@ int main(int argc, char *argv[]) {
     for (int i=0; i<dim*Npart; ++i) Position[i] = uniform(-0.5*Lbox, 0.5*Lbox);
     cout << " Initial configuration created"<<endl;
     cout << endl << "Begining of Montecarlo loop:"<<endl;
-    cout << "\t" << "Energy per particle"<<endl;
+    cout << "\t" << "Energy per particle"<<'\t'<<"Pressure"<<endl;
     
     // Montecarlo loop
     for (int istep = 0; istep<Nstep; ++istep) 
@@ -107,13 +108,14 @@ int main(int argc, char *argv[]) {
             Esample = Enew;		// The sampled energy is modified
         }
 	Int_Energy1+= 0.5*Esample;
+	virial_samp += calculate_virial(Position, Npart);
 	
         // Save sample energy and position
 	// Here we will also calculate the radial distribution function (rdf)
         if (istep % nsamp_ener == 0) {
 	  fich_ener << Int_Energy1/nsamp_ener*Npart << endl; // Storing energy
-	  cout << "\t" << Int_Energy1/nsamp_ener <<endl;
-	  Int_Energy1 = 0;
+	  cout << "\t" << Int_Energy1/nsamp_ener << '\t' << virial_samp/nsamp_ener <<endl;
+	  Int_Energy1 = 0.0; virial_samp = 0.0;
 	}   
 
 	// Positions an RDF
