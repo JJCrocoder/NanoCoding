@@ -23,6 +23,7 @@ float volume = pow(Lbox,dim);
 #include "../mic_pbc.h"
 #include "../my_random.h"
 #include "../my_potentials.h"
+#include "../my_forces.h"
 
 // Various function definitions
 float Int_Energy(float * Position, float * N_O_Pos, int itag, int Npart);
@@ -207,12 +208,11 @@ float calculate_virial(float * Position, int Npart) {
     for (int i = 0; i < Npart - 1; ++i) {
         for (int j = i + 1; j < Npart; ++j) {
 		float rij[dim] = {0.0};
-	    	for(int k = 0; k<dim; ++k){
-			rij[k] = Position[j * dim + k] -  Position[j * dim + k];
-			// Quiero obtener la fuerza sin tener que crear arrays i, j
-			// Force[k] = 
-			// virial += rij[k]*Force[k];
-		}
+	    	for(int k = 0; k<dim; ++k) rij[k] = Position[j * dim + k] -  Position[j * dim + k];
+		mic(rij,Lbox);
+		for(int k = 0; k<dim; ++k) r2_ij += vec_rij[k]*vec_rij[k];
+		Force[k] = -lj_force(r2_ij)*rij[k]/sqrt(r2_ij);
+		virial -= rij[k]*Force[k];
         }
     }
     return virial/(dim*volume);
