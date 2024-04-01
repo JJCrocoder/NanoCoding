@@ -119,9 +119,10 @@ int main(int argc, char *argv[]) {
 	    
         if (istep % nsamp_pos == 0) 
 	{
+	  ncount++;
             for (int i = 0; i < Npart - 1; ++i)	// For each particle
 	    {
-		// Saving positions
+	        // Saving positions
 		    
 		for (int k = 0; k < dim; ++k)		// For each component 
 		{
@@ -151,7 +152,6 @@ int main(int argc, char *argv[]) {
 		    int IBIN = floor((dist - dmin) / DeltaX);
 		    //Remember that the distance is of a pair of particles, so it contributes twice in our histogram.
 		    Histo[IBIN] += 2;
-		    ncount += 2;
                 }
             }
 	fich_posi<<endl<<"#"<<endl; // Add time frame separators (minipunto)
@@ -163,9 +163,10 @@ int main(int argc, char *argv[]) {
     for (int k = 0; k < num_bins; ++k) 
     {
         float rrr = dmin + DeltaX * (k + 0.5);
-        float Nideal = 4.0 * pi * dens * rrr * rrr;
+        float Nideal = 4.0/3.0 * pi * dens * (pow(rrr+DeltaX*0.5,3) - pow(rrr-DeltaX*0.5,3));
         float GR = Histo[k] / (Npart * Nideal * ncount);
         cout << '\t' << rrr << '\t' << GR << endl;
+	fich_rdf << rrr << '\t' << GR <<endl;
     }
 
     // Close data files
