@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     // Generate initial positions
     float pos;
     vector<float> x;
-    fstream positions("positions/equilibrium_positions.txt");
+    fstream positions("equilibrium_positions.txt");
     while (positions >> pos) x.push_back(pos);
     positions.close();
     for (int i = 0; i < 3*Npart; ++i) Pos[i] = x[i];
