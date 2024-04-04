@@ -1,93 +1,77 @@
+#include <iostream>
 #include <cstdlib>
-#include <random>
 #include <cmath>
 #include <fstream>
-#include <iostream>
+#include <random>
 #include <vector>
 using namespace std;
 
-typedef enum {VERLETSTEP1, VERLETSTEP2} verletstep;
-
 // Periodic boundary conditions (Minimum image convention)
 void mic(float * vec, float Lbox) {
-    for (int k = 0; k < 3 ; ++k) vec[k] -= floorf(0.5 + vec[k]/Lbox)*Lbox;
+    for (int i = 0; i < 3 ; ++i) vec[i] -= floorf(0.5 + vec[i]/Lbox)*Lbox;
     return;
 }
 
 // Function prototypes
-void generateInitialVelocities(float Vel[]);
-void moveVerlet(verletstep vstep, float Pos[], float Vel[], float For[]);
+void moveEuler(float Pos[], float For[]);
 void forces(float Pos[], float For[]);
-float temperature(float Vel[]);
 
 // Global variables
 const float sigma = 1.0;
-float r_cut = 2.5 * sigma;
 const float epsilon = 1.0;
 const int dim = 3;
 float Lbox = 10.0;
 float volume = Lbox*Lbox*Lbox;
+float r_cut = 2.5 * sigma;
 
-int Nstep = 100000;
+int nsamp_rdf = 10;
+int nsamp_pos = 100;
+float DIFF =  1.0;
 float deltaT = 0.005;
 float density = 0.1;
+float Temp = 1.9;
+float Kb = 1/Temp;
 int Npart=(int)(density*volume);
+int Nstep = 50000;
+float mu = DIFF / (Kb*Temp);
 
 // Main function
 int main(int argc, char *argv[]) {
 
     // Variables
     float Pos[dim*Npart];
-    float Vel[dim*Npart]={0};
-    float For[dim*Npart]={0};    
+    float For[dim*Npart]={0};
 
     // LOG of the run
     cout << "Particles = "<< Npart <<endl;    
 
     // Open data files
     ofstream fich_pos;
-    fich_pos.open("brownian_positions.txt");
+    fich_pos.open("motion_brownian.txt");
 
     // Generate initial positions
     float pos;
     vector<float> x;
-    fstream positions("equilibrium_energies.txt");
+    fstream positions("positions/equilibrium_positions.txt");
     while (positions >> pos) x.push_back(pos);
     positions.close();
     for (int i = 0; i < 3*Npart; ++i) Pos[i] = x[i];
     cout << "...Initial positions generated" <<endl;
 
-    // Generate initial velocities
-    generateInitialVelocities(Vel);
-    cout << "...Initial velocities generated" <<endl;
-
-    // Generate initial forces
-    forces(Pos, For);
-    cout << "...Initial forces generated" <<endl;
-
-    // Print intial temperature
-    cout << "Initial temperature: " << temperature(Vel) <<endl;
-
-    // Molecular Dynamics loop
+    // Brownian Dynamics loop
     for (int istep = 0; istep < Nstep+1; ++istep) {
 
         // Save positions
         for (int i = 0; i < Npart; ++i) {
-            for (int k = 0; k < dim; ++k) fich_pos << Pos[i * dim + k] << " ";       
+            for (int k = 0; k < dim; ++k) fich_pos << Pos[i * dim + k] << " ";
             fich_pos << endl;
         }
-
-        // Move particles using Verlet 1
-        moveVerlet(VERLETSTEP1, Pos, Vel, For);
 
         // Calculate forces
         forces(Pos, For);
 
-        // Move particles using Verlet 2
-        moveVerlet(VERLETSTEP2, Pos, Vel, For);
-
-        // Print temperature
-        if (istep % 1000 == 0) cout << "Temperature: " << temperature(Vel) <<endl;
+        // Move Particles
+        moveEuler(Pos, For);
     }
 
     // Close data files
@@ -96,45 +80,24 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-// Generate the gaussian initial velocities
-void generateInitialVelocities(float Vel[]) {
+// Euler algorithm function for the positional motion of particles
+void moveEuler(float Pos[], float For[]){
+    // Generate gaussian random numbers
     random_device rand_dev;
     mt19937 generator(rand_dev());
-    float temp = 1.9;
-    uniform_real_distribution<> gauss(0.0, temp);
+    normal_distribution<double> distribucion_normal(0, 1);
     
-    // Generate gaussian velocities
-    for (int i = 0; i < 3*Npart; ++i) Vel[i] = gauss(generator);
-}
+    // Loop for update each particle
+    for (int i = 0; i < Npart; ++i) {
+        float nu = distribucion_normal(generator);
 
-// Verlet algorithm for update particles position
-void moveVerlet(verletstep vstep, float Pos[], float Vel[], float For[]){
-    switch (vstep) {
-    case VERLETSTEP1:
-        // Loop for update each particle
-        for (int i = 0; i < Npart; ++i) { 
-            for (int k = 0; k < dim; ++k) {
-                // Update position using Verlet method
-                Pos[i * dim + k] += Vel[i * dim + k]*deltaT+ For[i * dim + k]*deltaT*deltaT*0.5;
-                Vel[i * dim + k] += For[i * dim + k] * deltaT * 0.5;
+        // Update position using Euler method
+        for (int k = 0; k < dim; ++k) {
+            Pos[i * dim + k] += mu * For[i * dim + k] * deltaT * sqrt(2.0*Kb*Temp*mu*deltaT) * nu * Lbox;
 
-                // Apply periodic boundary conditions
-                Pos[i * dim + k] -= floorf(0.5 + Pos[i * dim + k]/Lbox)*Lbox;
-            }
+            // Periodic boundary conditions (Minimum image convention)
+            Pos[i * dim + k] -= floorf(0.5 + Pos[i * dim + k]/Lbox)*Lbox;
         }
-    break;
-    case VERLETSTEP2:
-        // Loop for update each particle
-        for (int i = 0; i < Npart; ++i) { 
-            for (int k = 0; k < dim; ++k) {
-                // Update position using Verlet method
-                Vel[i * dim + k] += For[i * dim + k] * deltaT * 0.5;
-                
-                // Apply periodic boundary conditions
-                Pos[i * dim + k] -= floorf(0.5 + Pos[i * dim + k]/Lbox)*Lbox;
-            }
-        }
-    break;
     }
     return;
 }
@@ -159,10 +122,10 @@ void forces(float Pos[], float For[]) {
             // Obtain the square module
             for (int k = 0; k < dim; ++k) r2_ij += pow(r_ij[k], 2);
 
-            // Lennard-Jones forces (if we are under the cut)
+            // Lennard-Jones forces if we are under the cut
             if (r2_ij < r_2cut) {
                 float r_mod = sqrt(r2_ij);
-                if (r_mod < 1.2*sigma) continue; // If superposition
+                if (r_mod < 1.2*sigma) continue;
                 float r6 = pow((sigma / r_mod), 6.0);
 
                 // Calculate the force as the derivative of the Lennard-Jones energy
@@ -170,18 +133,10 @@ void forces(float Pos[], float For[]) {
 
                 // Calculate the force components for both particles (3rd Newton Law)
                 for (int k = 0; k < dim; ++k) {
-                    For[j * dim + k] -= (f_ij * r_ij[k]) / r_mod;
-                    For[i * dim + k] += (f_ij * r_ij[k]) / r_mod;
+                    For[j * dim + k] += (f_ij * r_ij[k]) / r_mod;
+                    For[i * dim + k] -= (f_ij * r_ij[k]) / r_mod;
                 }
             }
         }
     }
-}
-
-// Temperature calculation
-float temperature(float Vel[]){
-    float temp=0.;
-    for (int i = 0; i < 3*Npart; ++i) temp += Vel[i]*Vel[i];
-    temp /= 3*Npart;
-    return temp;
 }
