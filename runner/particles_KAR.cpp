@@ -197,8 +197,7 @@ float func_ener(float r, const vector<float>& r_rdf, const vector<float>& u_rdf)
 // Function for calculate the pressure using the RDF (quizás la ecuacion está mal)
 float func_press(float r, const vector<float>& r_rdf, const vector<float>& u_rdf) {
     float r6 = pow((sigma/r), 6.0);
-    float rc6 = pow((sigma/r_cut), 6.0);
-    float u = 4 * epsilon * ((r6 * r6 - r6) - (rc6 * rc6 - rc6));
+    float u = -48 * epsilon * (r6 * r6 - 0.5*r6)/r;
     return r * r * r * u * g_interpolated(r_rdf, u_rdf, r);
 }
 
